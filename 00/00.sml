@@ -13,5 +13,7 @@ fun majority (a : bool, b : bool, c : bool) : bool = (a andalso (b orelse c)) or
 fun median (a : real, b : real, c : real) : real = (a + b + c) - Real.max(Real.max(a, b), c) - Real.min(Real.min(a, b), c);
 
 (* Preveri ali so argumenti veljavne dolžine stranic nekega trikotnika - trikotnik ni izrojen *)
-fun triangle (a : int, b : int, c : int)  : bool = (a > 0 andalso b > 0 andalso c > 0)
-    andalso (a = b andalso b = c andalso a = c);
+(* fun triangle (a : int, b : int, c : int)  : bool = (a > 0 andalso b > 0 andalso c > 0) *)
+      (* andalso (a = b andalso b = c andalso a = c); *)
+
+fun triangle (a: int, b : int, c : int) : bool = a + b > c andalso a + c > b andalso b + c > a;

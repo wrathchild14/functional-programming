@@ -13,8 +13,8 @@ val test = majority (false, false, true) = false;
 
 val _ = print "~~~~~~~~ median ~~~~~~~~\n";
 val test_type: real * real * real -> real = median;
-(* val == = Real.==;
-infix ==; *)
+val == = Real.==;
+infix ==;
 val test = median (1.1, ~1.0, 1.0) == 1.0;
 
 val _ = print "~~~~~~~~ triangle ~~~~~~~~\n";
