@@ -18,3 +18,9 @@ fun median(a: real, b: real, c: real): real =
 
 (* Preveri ali so argumenti veljavne dolžine stranic nekega trikotnika - trikotnik ni izrojen *)
 fun triangle (a: int, b : int, c : int) : bool = a + b > c andalso a + c > b andalso b + c > a;
+
+(* Vrne rezultat potenciranja - `base` ^ `exponent` (`exponent` > 0)
+   pow (5, 3) = 125 *)
+fun pow (base : LargeInt.int, exponent : LargeInt.int) : LargeInt.int = if exponent = 1
+            then base
+            else base * pow(base, exponent - 1);

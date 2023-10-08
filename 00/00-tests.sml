@@ -20,3 +20,7 @@ val test = median (1.1, ~1.0, 1.0) == 1.0;
 val _ = print "~~~~~~~~ triangle ~~~~~~~~\n";
 val test_type: int * int * int -> bool = triangle;
 val test = triangle (~1, ~1, ~1) = false;
+
+val _ = print "~~~~~~~~ pow ~~~~~~~~\n";
+val test_type: LargeInt.int * LargeInt.int -> LargeInt.int = pow;
+val test = pow (5, 3) =125;
