@@ -23,4 +23,8 @@ val test = triangle (~1, ~1, ~1) = false;
 
 val _ = print "~~~~~~~~ pow ~~~~~~~~\n";
 val test_type: LargeInt.int * LargeInt.int -> LargeInt.int = pow;
-val test = pow (5, 3) =125;
+val test = pow (5, 3) = 125;
+
+val _ = print "~~~~~~~~ log ~~~~~~~~\n";
+val test_type: int * int -> int = log;
+val test = log (3, 12345) = 8;

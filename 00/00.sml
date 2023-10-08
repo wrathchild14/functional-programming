@@ -24,3 +24,10 @@ fun triangle (a: int, b : int, c : int) : bool = a + b > c andalso a + c > b and
 fun pow (base : LargeInt.int, exponent : LargeInt.int) : LargeInt.int = if exponent = 1
             then base
             else base * pow(base, exponent - 1);
+
+(* Vrne rezultat logaritmiranja - floor(log_`base`(`n`))  (`n` > 0, `base` > 1)
+   log (3, 12345) = 8 *)
+fun log (base : int, n : int) : int = 
+            if n < base then 0
+            else 
+                  1 + log(base, n div base);
