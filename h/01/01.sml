@@ -11,7 +11,7 @@ fun gcd (a : int, b : int) : int = if b <> 0 then gcd(b, a mod b) else a;
 fun len (xs : int list) : int = if null xs then 0 else 1 + len(tl xs);
 
 (*  Vrne SOME zadnji element seznama. Če je seznam prazen vrne NONE. *)
-(* fun last (xs : int list) : int option *)
+fun last (xs : int list) : int option = if null xs then NONE else SOME(List.last(xs));
 
 (*  Vrne SOME n-ti element seznama. Prvi element ima indeks 0. Če indeks ni veljaven, vrne NONE. *)
 (* fun nth (xs : int list, n : int) : int option *)
