@@ -12,8 +12,12 @@ val test = gcd (366, 60) = 6;
 
 val _ = print "~~~~~~~~ len ~~~~~~~~\n";
 val test_type: int list -> int = len;
-val test = len ([1,2,3,4,5]) = 5;
+val test = len ([1, 2, 3, 4, 5]) = 5;
 
 val _ = print "~~~~~~~~ last ~~~~~~~~\n";
 val test_type: int list -> int option = last;
-val test = last ([1,2,3,4,5]) = SOME(5);
+val test = last ([1, 2, 3, 4, 5]) = SOME(5);
+
+val _ = print "~~~~~~~~ nth ~~~~~~~~\n";
+val test_type: int list * int -> int option = nth;
+val test = nth ([1, 2, 3, 4, 5], 2) = SOME(3);
