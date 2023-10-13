@@ -9,7 +9,7 @@ fun majority (a : bool, b : bool, c : bool) : bool = a andalso b orelse c orelse
 
 (* Vrne mediano argumentov - števila tipa real brez (inf : real), (~inf : real), (nan : real) in (~0.0 : real)
    namig: uporabi Real.max in Real.min *)
-fun median(a: real, b: real, c: real): real =
+fun median(a : real, b : real, c : real): real =
     if a <= b andalso b <= c orelse c <= b andalso b <= a
     then b
     else if b <= a andalso a <= c orelse c <= a andalso a <= b
@@ -21,7 +21,8 @@ fun triangle (a: int, b : int, c : int) : bool = a + b > c andalso a + c > b and
 
 (* Vrne rezultat potenciranja - `base` ^ `exponent` (`exponent` > 0)
    pow (5, 3) = 125 *)
-fun pow (base : LargeInt.int, exponent : LargeInt.int) : LargeInt.int = if exponent = 1
+fun pow (base : LargeInt.int, exponent : LargeInt.int) : LargeInt.int = 
+    if exponent = 1
     then base
     else base * pow(base, exponent - 1);
 
