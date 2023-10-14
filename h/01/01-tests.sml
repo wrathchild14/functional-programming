@@ -21,3 +21,8 @@ val test = last ([1, 2, 3, 4, 5]) = SOME(5);
 val _ = print "~~~~~~~~ nth ~~~~~~~~\n";
 val test_type: int list * int -> int option = nth;
 val test = nth ([1, 2, 3, 4, 5], 2) = SOME(3);
+
+val _ = print "~~~~~~~~ insert ~~~~~~~~\n";
+val test_type: int list * int * int -> int list = insert;
+val test1 = insert ([1, 2, 3, 4, 5], 2, 99) = [1, 2, 99, 3, 4, 5];
+val test2 = insert ([1, 2, 3, 4, 5], 0, 99) = [99, 1, 2, 3, 4, 5];

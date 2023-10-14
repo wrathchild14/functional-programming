@@ -19,11 +19,12 @@ fun last (xs : int list) : int option =
         last(tl xs);
 
 (*  Vrne SOME n-ti element seznama. Prvi element ima indeks 0. Če indeks ni veljaven, vrne NONE. *)
-fun nth (xs : int list, n : int) : int option = if n=0 then SOME(hd xs) else nth(tl xs, n - 1);
+fun nth (xs : int list, n : int) : int option = 
+    if n=0 then SOME(hd xs) else nth(tl xs, n - 1);
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da je na n-to mesto vrinjen element x. Prvo mesto v seznamu ima indeks 0. Indeks n je veljaven (0 <= n <= length xs). *)
-(* fun insert (xs : int list, n : int, x : int) : int list = 
-  if n <= 0 orelse n >= len(xs) then nil else  *)
+fun insert (xs : int list, n : int, x : int) : int list = 
+    if n=0 then x :: xs else hd xs :: insert(tl xs, n - 1, x);
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da so vse pojavitve elementa x odstranjene. *)
 (* fun delete (xs : int list, x : int) : int list *)
