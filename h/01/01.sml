@@ -1,5 +1,5 @@
 (*  Vrne fakulteto števila n, n >= 0. *)
-fun factorial (n : int) : int = if n <= 0 then 0 else if n = 1 then 1 else n * factorial(n - 1);
+fun factorial (n : int) : int = if n=0 then 1 else if n = 1 then 1 else n * factorial(n - 1);
 
 (*  Vrne n-to potenco števila x, n >= 0. *)
 fun power (x : int, n : int) : int = if n = 0 then 1 else x * power(x, n - 1);
@@ -20,11 +20,17 @@ fun last (xs : int list) : int option =
 
 (*  Vrne SOME n-ti element seznama. Prvi element ima indeks 0. Če indeks ni veljaven, vrne NONE. *)
 fun nth (xs : int list, n : int) : int option = 
-    if n=0 then SOME(hd xs) else nth(tl xs, n - 1);
+    if n < 0 orelse n > len(xs) - 1 then
+      NONE 
+    else 
+      if n=0 then SOME(hd xs) else nth(tl xs, n - 1);
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da je na n-to mesto vrinjen element x. Prvo mesto v seznamu ima indeks 0. Indeks n je veljaven (0 <= n <= length xs). *)
 fun insert (xs : int list, n : int, x : int) : int list = 
-    if n=0 then x :: xs else hd xs :: insert(tl xs, n - 1, x);
+    if n < 0 orelse n > len(xs) - 1 then
+      []
+    else
+      if n=0 then x :: xs else hd xs :: insert(tl xs, n - 1, x);
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da so vse pojavitve elementa x odstranjene. *)
 fun delete (xs : int list, x : int) : int list =
