@@ -46,4 +46,4 @@ fun reverse (xs : int list) : int list =
     end;
 
 (*  Vrne true, če je podani seznam palindrom. Tudi prazen seznam je palindrom. *)
-(* fun palindrome (xs : int list) : bool *)
+fun palindrome (xs : int list) : bool = xs = reverse(xs);

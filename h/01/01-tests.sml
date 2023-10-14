@@ -36,3 +36,11 @@ val test3 = delete ([1, 2, 3, 4, 5], 5) = [1, 2, 3, 4];
 val _ = print "~~~~~~~~ reverse ~~~~~~~~\n";
 val test_type: int list -> int list = reverse;
 val test = reverse ([1, 2, 3, 4, 5]) = [5, 4, 3, 2, 1];
+
+val _ = print "~~~~~~~~ palindrome ~~~~~~~~\n";
+val test_type: int list -> bool = palindrome;
+val test1 = palindrome ([1, 2, 3, 2, 1]) = true;
+val test2 = palindrome ([1, 2, 3, 4, 5]) = false;
+val test3 = palindrome ([1, 1, 1, 1, 1]) = true;
+val test4 = palindrome ([1, 2, 1, 2, 1]) = true;
+val test5 = palindrome ([1, 2, 2, 1]) = true;
