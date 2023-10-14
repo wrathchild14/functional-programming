@@ -36,7 +36,14 @@ fun delete (xs : int list, x : int) : int list =
         hd xs::delete(tl xs, x)
 
 (*  Vrne obrnjen seznam. V pomoč si lahko spišete še funkcijo append, ki doda na konec seznama. *)
-(* fun reverse (xs : int list) : int list *)
+fun reverse (xs : int list) : int list =
+    let fun append (xs : int list, x : int) : int list = 
+          if null xs then [x]
+          else (hd xs)::append(tl xs, x)
+    in
+      if null xs then []
+      else append(reverse(tl xs), hd xs)
+    end;
 
 (*  Vrne true, če je podani seznam palindrom. Tudi prazen seznam je palindrom. *)
 (* fun palindrome (xs : int list) : bool *)

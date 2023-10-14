@@ -32,3 +32,7 @@ val test_type: int list * int -> int list = delete;
 val test1 = delete ([1, 2, 3, 4, 5], 4) = [1, 2, 3, 5];
 val test2 = delete ([1, 2, 3, 4, 5], 1) = [2, 3, 4, 5];
 val test3 = delete ([1, 2, 3, 4, 5], 5) = [1, 2, 3, 4];
+
+val _ = print "~~~~~~~~ reverse ~~~~~~~~\n";
+val test_type: int list -> int list = reverse;
+val test = reverse ([1, 2, 3, 4, 5]) = [5, 4, 3, 2, 1];
