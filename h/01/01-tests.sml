@@ -26,3 +26,9 @@ val _ = print "~~~~~~~~ insert ~~~~~~~~\n";
 val test_type: int list * int * int -> int list = insert;
 val test1 = insert ([1, 2, 3, 4, 5], 2, 99) = [1, 2, 99, 3, 4, 5];
 val test2 = insert ([1, 2, 3, 4, 5], 0, 99) = [99, 1, 2, 3, 4, 5];
+
+val _ = print "~~~~~~~~ delete ~~~~~~~~\n";
+val test_type: int list * int -> int list = delete;
+val test1 = delete ([1, 2, 3, 4, 5], 4) = [1, 2, 3, 5];
+val test2 = delete ([1, 2, 3, 4, 5], 1) = [2, 3, 4, 5];
+val test3 = delete ([1, 2, 3, 4, 5], 5) = [1, 2, 3, 4];

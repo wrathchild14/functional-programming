@@ -27,7 +27,13 @@ fun insert (xs : int list, n : int, x : int) : int list =
     if n=0 then x :: xs else hd xs :: insert(tl xs, n - 1, x);
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da so vse pojavitve elementa x odstranjene. *)
-(* fun delete (xs : int list, x : int) : int list *)
+fun delete (xs : int list, x : int) : int list =
+    if null xs then 
+      []
+    else if hd xs = x then 
+        delete(tl xs, x)
+      else 
+        hd xs::delete(tl xs, x)
 
 (*  Vrne obrnjen seznam. V pomoč si lahko spišete še funkcijo append, ki doda na konec seznama. *)
 (* fun reverse (xs : int list) : int list *)
