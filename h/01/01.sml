@@ -27,7 +27,7 @@ fun nth (xs : int list, n : int) : int option =
 
 (*  Vrne nov seznam, ki je tak kot vhodni, le da je na n-to mesto vrinjen element x. Prvo mesto v seznamu ima indeks 0. Indeks n je veljaven (0 <= n <= length xs). *)
 fun insert (xs : int list, n : int, x : int) : int list = 
-    if n < 0 orelse n > len(xs) - 1 then
+    if n < 0 orelse n > len(xs) then
       []
     else
       if n=0 then x :: xs else hd xs :: insert(tl xs, n - 1, x);
