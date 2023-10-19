@@ -4,7 +4,7 @@
     {
       "label": "sml-interpreter",
       "type": "shell",
-      "command": "sml ${file}",
+      "command": "rlwrap sml ${file}",
       "problemMatcher": {
         "owner": "sml",
         "fileLocation": "absolute",
@@ -24,16 +24,16 @@
         "isDefault": true
       },
       "presentation": {
-        "clear": true,
-        "showReuseMessage": false,
-        "focus": true,
-        "reveal": "always"
+          "clear": true,
+          "showReuseMessage": false,
+          "focus": true,
+          "reveal": "always"
       }
-    },
-    {
+  },
+  {
       "label": "sml-run-tests",
       "type": "shell",
-      "command": "sml ${file} ${fileDirname}\\${fileBasenameNoExtension}-tests.sml",
+      "command": "rlwrap sml ${file} ${fileDirname}/${fileBasenameNoExtension}-tests.sml",
       "problemMatcher": {
         "owner": "sml",
         "fileLocation": "absolute",
@@ -53,25 +53,11 @@
         "isDefault": true
       },
       "presentation": {
-        "clear": true,
-        "showReuseMessage": false,
-        "focus": true,
-        "reveal": "always"
+          "clear": true,
+          "showReuseMessage": false,
+          "focus": true,
+          "reveal": "always"
       }
-    },
-    {
-      "label": "Terminate All Tasks",
-      "command": "echo ${input:terminate}",
-      "type": "shell",
-      "problemMatcher": []
-    },
-  ],
-  "inputs": [
-    {
-      "id": "terminate",
-      "type": "command",
-      "command": "workbench.action.tasks.terminate",
-      "args": "terminateAll"
-    }
+  }
   ]
 }
