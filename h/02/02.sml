@@ -38,3 +38,47 @@ fun comp (a : number, b : number) : order =
             | (_, Pred x_b) => GREATER
             | _ => LESS
         end;
+
+datatype tree = Node of int * tree * tree | Leaf of int;
+
+(* Vrne true, če drevo vsebuje element x. *)
+fun contains (tree : tree, x : int) : bool = 
+        case tree of
+            Leaf l => l = x
+        | Node (t, l, r) => t = x orelse contains(l, x) orelse contains(r, x);
+
+(* Vrne število listov v drevesu. *)
+fun countLeaves (tree : tree) : int = 
+        case tree of
+            Leaf l => 1
+        | Node (t, l, r) => countLeaves(l) + countLeaves(r)
+
+(* Vrne število število vej v drevesu. *)
+fun countBranches (tree : tree) : int =
+        case tree of
+            Leaf l => 0
+        | Node(t, l, r) => 2 + countBranches(l) + countBranches(r);
+
+(* Vrne višino drevesa. Višina lista je 1. *)
+fun height (tree : tree) : int = 
+        case tree of
+            Leaf l => 1
+        | Node(t, l, r) => 1 + Int.max(height(l), height(r));
+
+(* Pretvori drevo v seznam z vmesnim prehodom (in-order traversal). *)
+(* fun toList (tree : tree) : int list = *)
+
+(* Vrne true, če je drevo uravnoteženo:
+ * - Obe poddrevesi sta uravnoteženi.
+ * - Višini poddreves se razlikujeta kvečjemu za 1.
+ * - Listi so uravnoteženi po definiciji.
+ *)
+(* fun isBalanced (tree : tree) : bool *)
+
+(* Vrne true, če je drevo binarno iskalno drevo:
+ * - Vrednosti levega poddrevesa so strogo manjši od vrednosti vozlišča.
+ * - Vrednosti desnega poddrevesa so strogo večji od vrednosti vozlišča.
+ * - Obe poddrevesi sta binarni iskalni drevesi.
+ * - Listi so binarna iskalna drevesa po definiciji.
+ *)
+(* fun isBST (tree : tree) : bool *)
