@@ -46,7 +46,7 @@ datatype tree = Node of int * tree * tree | Leaf of int;
 fun contains (tree : tree, x : int) : bool = 
         case tree of
             Leaf l => l = x
-        | Node (x, l, r) => t = x orelse contains(l, x) orelse contains(r, x);
+        | Node (node_value, l, r) => node_value = x orelse contains(l, x) orelse contains(r, x);
 
 (* Vrne število listov v drevesu. *)
 fun countLeaves (tree : tree) : int = 
@@ -67,7 +67,10 @@ fun height (tree : tree) : int =
         | Node(x, l, r) => 1 + Int.max(height(l), height(r));
 
 (* Pretvori drevo v seznam z vmesnim prehodom (in-order traversal). *)
-(* fun toList (tree : tree) : int list = *)
+fun toList (tree : tree) : int list = 
+        case tree of 
+            Leaf l => [l]
+        | Node(x, l, r) => toList(l) @ [x] @ toList(r)
 
 (* Vrne true, če je drevo uravnoteženo:
  * - Obe poddrevesi sta uravnoteženi.
