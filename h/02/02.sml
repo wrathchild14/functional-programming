@@ -46,25 +46,25 @@ datatype tree = Node of int * tree * tree | Leaf of int;
 fun contains (tree : tree, x : int) : bool = 
         case tree of
             Leaf l => l = x
-        | Node (t, l, r) => t = x orelse contains(l, x) orelse contains(r, x);
+        | Node (x, l, r) => t = x orelse contains(l, x) orelse contains(r, x);
 
 (* Vrne število listov v drevesu. *)
 fun countLeaves (tree : tree) : int = 
         case tree of
             Leaf l => 1
-        | Node (t, l, r) => countLeaves(l) + countLeaves(r)
+        | Node (x, l, r) => countLeaves(l) + countLeaves(r)
 
 (* Vrne število število vej v drevesu. *)
 fun countBranches (tree : tree) : int =
         case tree of
             Leaf l => 0
-        | Node(t, l, r) => 2 + countBranches(l) + countBranches(r);
+        | Node(x, l, r) => 2 + countBranches(l) + countBranches(r);
 
 (* Vrne višino drevesa. Višina lista je 1. *)
 fun height (tree : tree) : int = 
         case tree of
             Leaf l => 1
-        | Node(t, l, r) => 1 + Int.max(height(l), height(r));
+        | Node(x, l, r) => 1 + Int.max(height(l), height(r));
 
 (* Pretvori drevo v seznam z vmesnim prehodom (in-order traversal). *)
 (* fun toList (tree : tree) : int list = *)
