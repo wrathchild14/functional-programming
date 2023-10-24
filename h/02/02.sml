@@ -19,10 +19,11 @@ fun neg (a : number) : number =
 
 (* Vrne vsoto števil a in b. Pretvorba v int ni dovoljena! *)
 fun add (a : number, b : number) : number = 
-        case a of
-            Zero => Zero 
-        | Succ a => Succ (add(a, b))
-        | Pred a => Succ (add(a, b));
+        case (a, b) of
+            (Zero, b) => b
+        | (a, Zero) => a
+        | (Succ x, y) => Succ (add (x, y))
+        | (Pred x, y) => Pred (add (x, y))
 
 (* Vrne rezultat primerjave števil a in b. Pretvorba v int ter uporaba funkcij `add` in `neg` ni dovoljena!
     namig: uporabi funkcijo simp *)
@@ -32,11 +33,11 @@ fun comp (a : number, b : number) : order =
         in
             case (simp_a, simp_b) of
                 (Zero, Zero) => EQUAL
-            | (Succ x_a, Succ x_b) => comp(x_a, x_b)
-            | (Pred x_a, Pred x_b) => comp(x_a, x_b)
-            | (Succ x_a, _) => GREATER
-            | (_, Pred x_b) => GREATER
-            | _ => LESS
+            | (Zero, _) => LESS
+            | (_, Zero) => GREATER
+            | (Succ x, Succ y) => comp(x, y)
+            | (Pred x, Pred y) => comp(x, y)
+            | _ => EQUAL
         end;
 
 datatype tree = Node of int * tree * tree | Leaf of int;
