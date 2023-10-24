@@ -20,3 +20,6 @@ val height_test = height(tree1);
 
 val tree_list1 = toList(tree1);
 val tree_list2 = toList(tree2);
+
+val is_balanced1 = isBalanced(tree1);
+val is_balanced2 = isBalanced(tree2);

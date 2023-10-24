@@ -77,7 +77,16 @@ fun toList (tree : tree) : int list =
  * - Višini poddreves se razlikujeta kvečjemu za 1.
  * - Listi so uravnoteženi po definiciji.
  *)
-(* fun isBalanced (tree : tree) : bool *)
+fun isBalanced (tree : tree) : bool =
+        case tree of
+            Leaf _ => true
+        | Node (_, l, r) =>
+            let 
+                val l_h = height(l)
+                val r_h = height(r)
+            in
+                abs(l_h - r_h) <= 1 andalso isBalanced(l) andalso isBalanced(r)
+            end;
 
 (* Vrne true, če je drevo binarno iskalno drevo:
  * - Vrednosti levega poddrevesa so strogo manjši od vrednosti vozlišča.
