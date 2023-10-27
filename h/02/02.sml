@@ -33,11 +33,15 @@ fun comp (a : number, b : number) : order =
         in
             case (simp_a, simp_b) of
                 (Zero, Zero) => EQUAL
+            | (Succ _, Zero) => GREATER
+            | (Pred _, Zero) => LESS
+            | (Succ _, Pred _) => GREATER
+            | (Pred _, Succ _) => LESS
             | (Zero, _) => LESS
-            | (_, Zero) => GREATER
+            (* | (_, Zero) => GREATER *)
             | (Succ x, Succ y) => comp(x, y)
             | (Pred x, Pred y) => comp(x, y)
-            | _ => EQUAL
+            (* | _ => EQUAL *)
         end;
 
 datatype tree = Node of int * tree * tree | Leaf of int;
@@ -94,4 +98,16 @@ fun isBalanced (tree : tree) : bool =
  * - Obe poddrevesi sta binarni iskalni drevesi.
  * - Listi so binarna iskalna drevesa po definiciji.
  *)
-(* fun isBST (tree : tree) : bool *)
+fun isBST (tree : tree) : bool = 
+        case tree of 
+            Leaf _ => true
+        | Node(x, left, right) =>
+            case (left, right) of
+                (Leaf x_l, Leaf x_r) =>
+                    x_l < x andalso x_r > x
+            | (Leaf x_l, Node (x_r, _, _)) =>
+                x_l < x andalso x_r > x andalso isBST(right)
+            | (Node (x_l, _, _), Leaf x_r) =>
+                x_l < x andalso x_r > x andalso isBST(left)
+            | (Node (x_l, _, _), Node (x_r, _, _)) =>
+                x_l < x andalso x_r > x andalso isBST(left) andalso isBST(right);
