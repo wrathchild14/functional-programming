@@ -14,7 +14,7 @@ val map_result = map(is_even_fn, big_list);
 val filter_result = filter(is_even_fn, big_list);
 
 val sum = fn (x, y) => x + y;
-val foldl_result = foldl(sum, 0, big_list);
+val foldl_result = fold(sum, 0, big_list);
 
 
 (* izpis daljših izrazov v interpreterju *)

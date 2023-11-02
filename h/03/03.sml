@@ -32,7 +32,7 @@ fun map(_, []) = []
 fun filter(_, []) = []
   | filter(f, x::xs) =
     if f(x) then x::filter(f, xs)
-    else filter(f, xs); 
+    else filter(f, xs);
 
-fun foldl(_, z, []) = z 
-  | foldl (f, z, x::xs) = foldl(f, f(z, x), xs)
+fun fold(_, z, []) = z
+  | fold (f, z, x::xs) = fold(f, f(z, x), xs)
