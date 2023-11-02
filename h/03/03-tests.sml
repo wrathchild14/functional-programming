@@ -16,6 +16,17 @@ val filter_result = filter(is_even_fn, big_list);
 val sum = fn (x, y) => x + y;
 val foldl_result = fold(sum, 0, big_list);
 
+val tree1 = br (lf, 10, lf);
+val tree2 = br (br (lf, 5, lf), 10, br (lf, 15, lf));
+(* requires rotations *)
+val tree3 = br (br (br (lf, 5, lf), 10, lf), 15, lf); 
+(* unbalanced *)
+val tree4 = br (lf, 10, br (lf, 20, br (lf, 30, br (lf, 40, br (lf, 50, lf)))));
+(* balanced is needed after inserting node *)
+val tree5 = br (br (br (lf, 5, lf), 10, br (lf, 15, lf)), 20, lf);
+
+val rotation_result_r = rotate(tree3, R);
+val rotation_result_l = rotate(tree3, L);
 
 (* izpis daljših izrazov v interpreterju *)
 val _ = Control.Print.printDepth := 100;
