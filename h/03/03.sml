@@ -37,15 +37,8 @@ fun filter(_, []) = []
 fun fold(_, z, []) = z
   | fold(f, z, x::xs) = fold(f, f(z, x), xs)
 
-fun height(lf) = 0
-  | height(br (l, _, r)) = 1 + Int.max(height(l), height(r));
-
-fun rotate(lf, _) = lf
-  | rotate(br(l, x, r), L) = 
-    (case l of 
-        lf => br(l, x, r)
-      | br(ls, xs, rs) => br(ls, xs, br(rs, x, r)))
-  | rotate(br(l, x, r), R) =
-    (case r of 
-        lf => br(l, x, r)
-      | br(ls, xs, rs) => br(br(l, x, ls), xs, rs));
+fun rotate(tree, dir) =
+    case (tree, dir) of
+      ((br (br (ls, xs, rs), x, r)), R) => br (ls, xs, br (rs, x, r))
+    | ((br (l, x, br (ls, xs, rs)), L)) => br (br (l, x, ls), xs, rs)
+    | (tree, _) => tree;
