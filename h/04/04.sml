@@ -14,12 +14,12 @@ fun largestString xs = bestString (fn (x, y) => String.compare(x, y) = GREATER) 
 
 fun longestString xs = bestString (fn (x, y) => size x > size y) xs
 
-fun quicksort f [] = []
-  | quicksort f (x::xs) =
+fun quicksort _ [] = []
+  | quicksort f xs =
     let
-      val (smaller, greater) = List.partition (fn y => f(x, y) = LESS) xs
+      val (smaller, greater) = List.partition (fn y => f(hd xs, y) = LESS) (tl xs)
     in
-      quicksort f smaller @ [x] @ quicksort f greater
+      quicksort f smaller @ [hd xs] @ quicksort f greater
     end
 
 fun dot xs ys = List.foldl (fn(x, y) => x + y) 0 (ListPair.map(fn (x, y) => x * y) (xs, ys))
@@ -29,7 +29,7 @@ fun transpose matrix =
       [] => []
     | [] :: _ => []
     | _ =>
-      List.map (fn row => hd row) matrix :: transpose (List.map tl matrix)
+      List.map hd matrix :: transpose (List.map tl matrix)
 
 fun multiply m1 m2 = 
       List.map (fn row => List.map (fn col => dot row col) (transpose m2)) m1
