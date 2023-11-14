@@ -23,3 +23,14 @@ fun quicksort f [] = []
     end;
 
 fun dot xs ys = List.foldl (fn(x, y) => x + y) 0 (ListPair.map(fn (x, y) => x * y) (xs, ys))
+
+fun transpose matrix = 
+    case matrix of
+      [] => []
+    | [] :: _ => []
+    | _ =>
+      List.map (fn row => hd row) matrix :: transpose (List.map tl matrix);
+
+fun multiply m1 m2 = 
+      List.map (fn row => List.map (fn col => dot row col) (transpose m2)) m1
+      
