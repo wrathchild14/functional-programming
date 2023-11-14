@@ -33,4 +33,15 @@ fun transpose matrix =
 
 fun multiply m1 m2 = 
       List.map (fn row => List.map (fn col => dot row col) (transpose m2)) m1
-      
+
+fun group [] = []
+  | group (x::xs) =
+    let
+      fun count(_, _) [] = []
+        | count (current, counter) (y::ys) = 
+          if x = y 
+          then count (current, counter + 1) ys
+          else (current, counter) :: count (y, 1) ys
+    in
+      count (x, 1) xs
+    end
