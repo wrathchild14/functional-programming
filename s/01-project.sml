@@ -14,9 +14,36 @@ fun readFile filename =
 
 exception NotImplemented;
 
-fun split _ _ = raise NotImplemented;
+fun split n xs = 
+  let
+    fun fold_helper (x , []) = [[x]]
+      | fold_helper (x, acc as current::rest) =
+        if length current < n then
+          (current @ [x]) :: rest
+        else
+          [x] :: acc
+  in
+    if n > List.length xs then 
+      []
+    else
+      List.map List.rev (foldr fold_helper [] xs)
+  end
 
-fun xGCD _ = raise NotImplemented;
+val test1 = split 3 [1,24,12,15,23,26,24,7,3] 
+val test2 = split 5 [1,24,12,15,23,26,24,7,3] 
+val test3 = split 1 [1,24,12] 
+
+fun xGCD (a, b) =
+  if b = 0 then
+    (a, 1, 0)
+  else
+    let
+      val q = a div b
+      val r = a mod b
+      val (g, s, t) = xGCD (b, r)
+    in
+      (g, t, s - q * t)
+    end
 
 signature RING =
 sig
