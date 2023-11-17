@@ -14,35 +14,56 @@ fun readFile filename =
 
 exception NotImplemented;
 
-fun split n xs = 
-  let
-    fun fold_helper (x , []) = [[x]]
-      | fold_helper (x, acc as current::rest) =
-        if length current < n then
-          (current @ [x]) :: rest
-        else
-          [x] :: acc
-  in
-    if n > List.length xs then 
-      []
-    else
-      List.map List.rev (foldr fold_helper [] xs)
-  end
-
-val test1 = split 3 [1,24,12,15,23,26,24,7,3] 
-val test2 = split 5 [1,24,12,15,23,26,24,7,3] 
-val test3 = split 1 [1,24,12] 
-
-fun xGCD (a, b) =
-  if b = 0 then
-    (a, 1, 0)
-  else
+fun split _ [] = []
+  | split n xs =
     let
-      val q = a div b
-      val r = a mod b
-      val (g, s, t) = xGCD (b, r)
+      fun taken(_, 0) = []
+        | taken([], _) = []
+        | taken(y::ys, k) = y :: taken(ys, k - 1)
+
+      val firstChunk  = taken(xs, n)
+      val rest = List.drop(xs, n) handle
+        Subscript => []
     in
-      (g, t, s - q * t)
+      if length firstChunk = 0 orelse length firstChunk < n then
+        []
+      else if length rest < n then
+        [firstChunk]
+      else
+        firstChunk :: split n rest
+    end
+
+fun xGCD(a, b) =
+  let
+    val (mutable_s, mutable_old_s) = (ref 0, ref 1)
+    val (mutable_r, mutable_old_r) = (ref b, ref a)
+    val quotient = ref 0
+    val bezout_t = ref 0
+  in
+    (
+      while !mutable_r <> 0 do
+        (
+          quotient := !mutable_old_r div !mutable_r;
+
+          let
+            val temp_r = !mutable_r
+            val temp_s = !mutable_s
+          in
+            mutable_r := !mutable_old_r - (!quotient * !mutable_r);
+            mutable_old_r := temp_r;
+
+            mutable_s := !mutable_old_s - (!quotient * !mutable_s);
+            mutable_old_s := temp_s
+          end;
+
+          if b <> 0 then
+            bezout_t := (!mutable_old_r - !mutable_old_s * a) div b
+          else
+            bezout_t := 0
+        )
+      );
+
+      (!mutable_old_r, !mutable_old_s, !bezout_t)
     end
 
 signature RING =
