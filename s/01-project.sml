@@ -117,16 +117,34 @@ struct
   type t = R.t
   structure Vec =
     struct
-      fun dot _ _ = raise NotImplemented
-      fun add _ _ = raise NotImplemented
-      fun sub _ _ = raise NotImplemented
-      fun scale _ _ = raise NotImplemented
+      fun dot a b = foldl R.+ R.zero (ListPair.map R.* (a,b))
+      fun add a b = ListPair.map R.+ (a, b)
+      fun sub a b = ListPair.map (fn (x, y) => R.+ (x, R.neg y)) (a, b)
+      fun scale a b = map (fn x => R.* (a, x)) b
     end
 
-  fun tr _ = raise NotImplemented
-  fun mul _ _ = raise NotImplemented
-  fun id _ = raise NotImplemented
-  fun join _ _ = raise NotImplemented
+  fun tr m = 
+    case m of 
+        [] => []
+      | [] :: _ => []
+      | _ => map hd m :: tr (map tl m)
+  fun mul m1 m2 = map (fn row => map (fn col => Vec.dot row col) (tr m2)) m1
+  fun id n =
+    List.tabulate(n, fn i =>
+      List.tabulate(n, fn j =>
+        if i = j then R.one else R.zero
+    ))
+    (* let
+      fun generateRow i j = if i = j then R.one else R.zero
+      fun generateIdRow i = List.tabulate(n, (generateRow i))
+    in
+      List.tabulate(n, generateIdRow)
+    end *)
+  fun join m1 m2 = 
+    if length m1 = length m2 then 
+      ListPair.map(fn (row1, row2) => row1 @ row2) (m1, m2) 
+    else 
+      m1
   fun inv _ = raise NotImplemented
 end;
 
