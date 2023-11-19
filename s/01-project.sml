@@ -128,7 +128,7 @@ struct
         [] => []
       | [] :: _ => []
       | _ => map hd m :: tr (map tl m)
-  fun mul m1 m2 = map (fn row => map (fn col => Vec.dot row col) (tr m2)) m1
+  fun mul m1 m2 = map (fn row => map (Vec.dot row) (tr m2)) m1
   fun id n =
     List.tabulate(n, fn i =>
       List.tabulate(n, fn j =>
