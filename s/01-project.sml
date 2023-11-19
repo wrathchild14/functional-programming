@@ -188,8 +188,23 @@ functor HillCipherAnalyzer (M : MAT) :> CIPHER
 struct
   type t = M.t
   
-  fun encrypt key plaintext = raise NotImplemented
-  fun decrypt key ciphertext = raise NotImplemented
+  fun encrypt key plaintext = 
+    let
+      val blocks = split (length key) plaintext
+    in
+      List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] key))::acc) [] blocks)
+    end
+
+  fun decrypt key ciphertext = 
+    let
+      val blocks = split (length key) ciphertext
+      val invm = case M.inv key of SOME inv => inv | NONE => [[]]
+    in
+      case invm of
+        [[]] => NONE
+        | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks))
+    end
+
   fun knownPlaintextAttack keyLenght plaintext ciphertext = raise NotImplemented
 end;
 
