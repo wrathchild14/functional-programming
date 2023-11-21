@@ -17,20 +17,13 @@ exception NotImplemented;
 fun split _ [] = []
   | split n xs =
     let
-      fun taken(_, 0) = []
-        | taken([], _) = []
-        | taken(y::ys, k) = y :: taken(ys, k - 1)
-
-      val firstChunk  = taken(xs, n)
-      val rest = List.drop(xs, n) handle
-        Subscript => []
+      val first  = List.take(xs, n) handle Subscript => []
+      val rest = List.drop(xs, n) handle Subscript => []
     in
-      if length firstChunk = 0 orelse length firstChunk < n then
+      if length first = 0 then
         []
-      else if length rest < n then
-        [firstChunk]
       else
-        firstChunk :: split n rest
+        first :: split n rest
     end
 
 fun xGCD(a, b) =
