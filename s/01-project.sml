@@ -14,16 +14,15 @@ fun readFile filename =
 
 exception NotImplemented;
 
-fun split _ [] = []
-  | split n xs =
+fun split n xs =
     let
       val first  = List.take(xs, n) handle Subscript => []
       val rest = List.drop(xs, n) handle Subscript => []
     in
-      if length first = 0 then
-        []
-      else
+      if length first > 0 then
         first :: split n rest
+      else
+        []
     end
 
 fun xGCD(a, b) =
@@ -198,7 +197,20 @@ struct
         | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks))
     end
 
-  fun knownPlaintextAttack keyLenght plaintext ciphertext = raise NotImplemented
+  fun knownPlaintextAttack keyLenght plaintext ciphertext = 
+    let
+      val blocksPlain = split keyLenght plaintext
+      val blocksCipher = split keyLenght ciphertext
+
+      val mx = (M.mul (M.tr blocksPlain) blocksPlain)
+      val my = (M.mul (M.tr blocksCipher) blocksCipher)
+
+      val xinv = (M.inv mx)
+      in
+        case xinv of
+          SOME minv => SOME(M.mul minv my)
+        | NONE => NONE
+      end
 end;
 
 
