@@ -189,12 +189,13 @@ struct
 
   fun decrypt key ciphertext = 
       let
-        val blocks = split (length key) ciphertext
+        (* val blocks = split (length key) ciphertext *)
         val invm = case M.inv key of SOME inv => inv | NONE => [[]]
       in
         case invm of
           [[]] => NONE
-        | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks))
+        (* | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks)) *)
+        | _ => SOME(encrypt invm ciphertext) (* the same *)
       end
 
   fun knownPlaintextAttack keyLength plaintext ciphertext = 
