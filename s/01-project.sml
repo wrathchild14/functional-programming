@@ -322,8 +322,24 @@ struct
   structure Matrix = Mat (Ring)
   structure Cipher = HillCipherAnalyzer (Matrix)
 
-  fun encode txt = raise NotImplemented
-  fun decode code = raise NotImplemented
+  fun encode txt =
+      let
+        fun charToIndex _ _ [] = raise Option
+          | charToIndex c counter (alphabet_c::rest) = 
+            if alphabet_c = c then counter
+            else charToIndex c (counter + 1) rest
+      in
+        List.map (fn c => charToIndex c 0 alphabet) (String.explode txt)
+      end
+
+  fun decode code =
+      let
+        fun indexToChar i =
+            if i < length alphabet then List.nth (alphabet, i)
+            else raise Option
+      in
+        String.implode (List.map indexToChar code)
+      end
 
   local
     fun parseWords filename =
@@ -339,8 +355,11 @@ struct
 
     val dictionary = List.foldl (fn (w, d) => Trie.insert w d) Trie.empty (List.map String.explode (parseWords "hamlet.txt")) handle NotImplemented => Trie.empty
   in
-    fun encrypt key plaintext = raise NotImplemented
-    fun decrypt key ciphertext = raise NotImplemented
+    fun encrypt key plaintext = decode (Cipher.encrypt key (encode plaintext))
+    fun decrypt key ciphertext = 
+        case Cipher.decrypt key (encode ciphertext) of
+          SOME bla => SOME (decode bla)
+        | NONE => NONE
     fun knownPlaintextAttack keyLenght plaintext ciphertext = raise NotImplemented
     fun ciphertextOnlyAttack keyLenght ciphertext = raise NotImplemented
   end
