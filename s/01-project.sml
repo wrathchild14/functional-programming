@@ -257,8 +257,42 @@ struct
 
   val empty = [] : ''a dict
 
-  fun insert w dict = raise NotImplemented
-  fun lookup w dict = raise NotImplemented
+  fun insert [] dict = dict
+  | insert [x] [] = [N(x, true, [])]
+  | insert [x] (N(y, flag, children) :: rest) =
+    if x = y then
+      N(y, true, children) :: rest
+    else
+      N(y, flag, children) :: insert [x] rest
+  | insert (x::xs) [] = [N(x, false, insert xs [])]
+  | insert (x::xs) (N(y, flag, children)::rest) =
+        case (x = y, xs, children) of
+          (true, [], _) =>
+            N(y, true, []) :: rest
+        | (true, _, _) => N(y, flag, insert xs children) :: rest
+        | (_, _, _) =>
+            N(y, flag, children) :: insert (x::xs) rest
+
+  fun lookup [] _ = false
+  | lookup _ [] = false
+  | lookup [x] (N(y, flag, _) :: _) = x = y andalso flag
+  | lookup (x::xs) (N(y, _, children) :: rest) =
+      if x = y then
+        lookup xs children
+      else
+        lookup (x::xs) rest
+
+
+  (* fun printt [] = print ""
+  | printt (N (c, b, children) :: rest) = (
+      print ("N (#\"" ^ Char.toString c ^ "\"," ^ Bool.toString b ^ ", [");
+      printt children;
+      print "])";
+      if not (null children) andalso not (null rest) then
+        print ", "
+      else ();
+      printt rest
+    ) *)
 end;
 
 signature HILLCIPHER =
