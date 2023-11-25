@@ -206,10 +206,8 @@ struct
 
         fun attack_alt rows = 
             let 
-              val x_ = List.take((split keyLength plaintext), rows) handle
-                  Subscript => []
-              val y_ = List.take((split keyLength ciphertext), rows) handle
-                  Subscript => []
+              val x_ = List.take((split keyLength plaintext), rows) handle Subscript => [[]]
+              val y_ = List.take((split keyLength ciphertext), rows) handle Subscript => [[]]
 
               val mx_ = (M.mul (M.tr x_) x_)
               val my_ = (M.mul (M.tr y_) y_)
@@ -217,20 +215,28 @@ struct
               val xinv_ = (M.inv mx_)
             in 
               case xinv_ of
-                SOME minv => SOME (M.mul minv my_)
+                SOME minv => if M.mul x (M.mul minv my_) = y then SOME (M.mul minv my_) else attack_alt (rows + 1)
               | NONE => 
                 if rows < keyLength then 
                   attack_alt (rows+1)
                 else NONE
             end
       in
-        if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
+        (* if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
           NONE
-        else
+        else *)
           if length x > 1 andalso length y > 1 then
             case xinv of
+              SOME minv => if M.mul x (M.mul minv y) = y then SOME(M.mul minv y) else attack_alt 1
+            | NONE => attack_alt 1 
+            (* | NONE => case attack_alt 1 of
+                        SOME minv' => if M.mul x (M.mul minv' y) = y then SOME(M.mul minv' y) else NONE
+                      | NONE => NONE                       *)
+          
+
+            (* case xinv of
               SOME minv => SOME(M.mul minv y)
-            | NONE => attack_alt 1
+            | NONE => attack_alt 1 *)
           else 
             NONE
       end
