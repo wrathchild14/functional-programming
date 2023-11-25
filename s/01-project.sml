@@ -197,20 +197,42 @@ struct
         | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks))
     end
 
-  fun knownPlaintextAttack keyLenght plaintext ciphertext = 
+  fun knownPlaintextAttack keyLength plaintext ciphertext = 
     let
-      val blocksPlain = split keyLenght plaintext
-      val blocksCipher = split keyLenght ciphertext
+      val x = List.take((split keyLength plaintext), keyLength) handle Subscript => [[]]
+      val y = List.take((split keyLength ciphertext), keyLength) handle Subscript => [[]]
+      val xinv = (M.inv x)
 
-      val mx = (M.mul (M.tr blocksPlain) blocksPlain)
-      val my = (M.mul (M.tr blocksCipher) blocksCipher)
+      fun attack_alt rows = 
+        let 
+          val x_ = List.take((split keyLength plaintext), rows) handle
+            Subscript => []
+          val y_ = List.take((split keyLength ciphertext), rows) handle
+            Subscript => []
 
-      val xinv = (M.inv mx)
-      in
-        case xinv of
-          SOME minv => SOME(M.mul minv my)
-        | NONE => NONE
-      end
+          val mx_ = (M.mul (M.tr x_) x_)
+          val my_ = (M.mul (M.tr y_) y_)
+
+          val xinv_ = (M.inv mx_)
+        in 
+          case xinv_ of
+              SOME minv => SOME (M.mul minv my_)
+            | NONE => 
+                if rows < keyLength then 
+                  attack_alt (rows+1)
+                else NONE
+        end
+    in
+        if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
+          NONE
+        else
+          if length x > 1 andalso length y > 1 then
+            case xinv of
+              SOME minv => SOME(M.mul minv y)
+            | NONE => attack_alt 1
+          else 
+            NONE
+    end
 end;
 
 
