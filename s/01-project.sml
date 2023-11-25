@@ -194,7 +194,7 @@ struct
       in
         case invm of
           [[]] => NONE
-        (* | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks)) *)
+          (* | _ => SOME (List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] invm))::acc) [] blocks)) *)
         | _ => SOME(encrypt invm ciphertext) (* the same *)
       end
 
@@ -225,20 +225,20 @@ struct
         (* if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
           NONE
         else *)
-          if length x > 1 andalso length y > 1 then
-            case xinv of
-              SOME minv => if M.mul x (M.mul minv y) = y then SOME(M.mul minv y) else attack_alt 1
-            | NONE => attack_alt 1 
-            (* | NONE => case attack_alt 1 of
+        if length x > 1 andalso length y > 1 then
+          case xinv of
+            SOME minv => if M.mul x (M.mul minv y) = y then SOME(M.mul minv y) else attack_alt 1
+          | NONE => attack_alt 1 
+          (* | NONE => case attack_alt 1 of
                         SOME minv' => if M.mul x (M.mul minv' y) = y then SOME(M.mul minv' y) else NONE
                       | NONE => NONE                       *)
           
 
-            (* case xinv of
+          (* case xinv of
               SOME minv => SOME(M.mul minv y)
             | NONE => attack_alt 1 *)
-          else 
-            NONE
+        else 
+          NONE
       end
 end;
 
@@ -258,25 +258,25 @@ struct
   val empty = [] : ''a dict
 
   fun insert [] dict = dict
-  | insert [x] [] = [N(x, true, [])]
-  | insert [x] (N(y, flag, children) :: rest) =
-    if x = y then
-      N(y, true, children) :: rest
-    else
-      N(y, flag, children) :: insert [x] rest
-  | insert (x::xs) [] = [N(x, false, insert xs [])]
-  | insert (x::xs) (N(y, flag, children)::rest) =
-        case (x = y, xs, children) of
-          (true, [], _) =>
-            N(y, true, []) :: rest
-        | (true, _, _) => N(y, flag, insert xs children) :: rest
-        | (_, _, _) =>
-            N(y, flag, children) :: insert (x::xs) rest
+    | insert [x] [] = [N(x, true, [])]
+    | insert [x] (N(y, flag, children) :: rest) =
+      if x = y then
+        N(y, true, children) :: rest
+      else
+        N(y, flag, children) :: insert [x] rest
+    | insert (x::xs) [] = [N(x, false, insert xs [])]
+    | insert (x::xs) (N(y, flag, children)::rest) =
+      case (x = y, xs, children) of
+        (true, [], _) =>
+          N(y, true, []) :: rest
+      | (true, _, _) => N(y, flag, insert xs children) :: rest
+      | (_, _, _) =>
+        N(y, flag, children) :: insert (x::xs) rest
 
   fun lookup [] _ = false
-  | lookup _ [] = false
-  | lookup [x] (N(y, flag, _) :: _) = x = y andalso flag
-  | lookup (x::xs) (N(y, _, children) :: rest) =
+    | lookup _ [] = false
+    | lookup [x] (N(y, flag, _) :: _) = x = y andalso flag
+    | lookup (x::xs) (N(y, _, children) :: rest) =
       if x = y then
         lookup xs children
       else
