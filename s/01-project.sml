@@ -262,15 +262,15 @@ struct
   val empty = [] : ''a dict
 
   fun insert [] dict = dict
-  | insert (x::xs) [] = [N(x, null xs, insert xs [])]
-  | insert (x::xs) (N(y, flag, children) :: rest) =
-    if x = y then
-      if null xs then
-        N(y, true, children) :: rest
+    | insert (x::xs) [] = [N(x, null xs, insert xs [])]
+    | insert (x::xs) (N(y, flag, children) :: rest) =
+      if x = y then
+        if null xs then
+          N(y, true, children) :: rest
+        else
+          N(y, flag, insert xs children) :: rest
       else
-        N(y, flag, insert xs children) :: rest
-    else
-      N(y, flag, children) :: insert (x::xs) rest
+        N(y, flag, children) :: insert (x::xs) rest
 
   fun lookup [] _ = false
     | lookup _ [] = false
@@ -358,7 +358,7 @@ struct
         case Cipher.decrypt key (encode ciphertext) of
           SOME bla => SOME (decode bla)
         | NONE => NONE
-    fun knownPlaintextAttack keyLenght plaintext ciphertext = raise NotImplemented
+    fun knownPlaintextAttack keyLenght plaintext ciphertext = Cipher.knownPlaintextAttack keyLenght (encode plaintext) (encode ciphertext)
     fun ciphertextOnlyAttack keyLenght ciphertext = raise NotImplemented
   end
 end;
