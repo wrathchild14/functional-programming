@@ -180,11 +180,13 @@ functor HillCipherAnalyzer (M : MAT) :> CIPHER
 struct
   type t = M.t
   
-  fun encrypt key plaintext = 
+  fun encrypt key plaintext =
       let
-        val blocks = split (length key) plaintext
+        val size = length key
+        val blocks = split size plaintext
+        val encrypted = List.map (fn block => hd (M.mul [block] key)) blocks
       in
-        List.concat(List.foldr (fn (block, acc) => (hd (M.mul [block] key))::acc) [] blocks)
+        List.concat encrypted
       end
 
   fun decrypt key ciphertext = 
@@ -200,14 +202,17 @@ struct
 
   fun knownPlaintextAttack keyLength plaintext ciphertext = 
       let
-        val x = List.take((split keyLength plaintext), keyLength) handle Subscript => [[]]
-        val y = List.take((split keyLength ciphertext), keyLength) handle Subscript => [[]]
-        val xinv = (M.inv x)
+        val x = split keyLength plaintext
+        val y = split keyLength ciphertext
+
+        val xx = List.take(x, keyLength) handle Subscript => [[]]
+        val yy = List.take(y, keyLength) handle Subscript => [[]]
+        val xinv = (M.inv xx)
 
         fun attack_alt rows = 
             let 
-              val x_ = List.take((split keyLength plaintext), rows) handle Subscript => [[]]
-              val y_ = List.take((split keyLength ciphertext), rows) handle Subscript => [[]]
+              val x_ = List.take(x, rows) handle Subscript => [[]]
+              val y_ = List.take(y, rows) handle Subscript => [[]]
 
               val mx_ = (M.mul (M.tr x_) x_)
               val my_ = (M.mul (M.tr y_) y_)
@@ -215,30 +220,28 @@ struct
               val xinv_ = (M.inv mx_)
             in 
               case xinv_ of
-                SOME minv => if M.mul x (M.mul minv my_) = y then SOME (M.mul minv my_) else attack_alt (rows + 1)
+                (* SOME minv => if M.mul x (M.mul minv my_) = y then SOME (M.mul minv my_) else attack_alt (rows + 1) *)
+                SOME minv => SOME (M.mul minv my_)
               | NONE => 
-                if rows < keyLength then 
+                if rows < length x andalso rows < length y then 
                   attack_alt (rows+1)
                 else NONE
             end
       in
-        (* if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
+        if length plaintext <> length ciphertext orelse length plaintext mod keyLength <> 0 then
           NONE
-        else *)
-        if length x > 1 andalso length y > 1 then
-          case xinv of
-            SOME minv => if M.mul x (M.mul minv y) = y then SOME(M.mul minv y) else attack_alt 1
-          | NONE => attack_alt 1 
-          (* | NONE => case attack_alt 1 of
-                        SOME minv' => if M.mul x (M.mul minv' y) = y then SOME(M.mul minv' y) else NONE
-                      | NONE => NONE                       *)
-          
-
-          (* case xinv of
-              SOME minv => SOME(M.mul minv y)
-            | NONE => attack_alt 1 *)
-        else 
-          NONE
+        else
+          if length x > 1 andalso length y > 1 then
+            (* case xinv of *)
+            (* SOME minv => if M.mul x (M.mul minv y) = y then SOME(M.mul minv y) else attack_alt 1
+            | NONE => attack_alt 1  *)
+            (* | NONE => case attack_alt 1 of
+                          SOME minv' => if M.mul x (M.mul minv' y) = y then SOME(M.mul minv' y) else NONE
+                        | NONE => NONE                       *)
+            case xinv of
+              SOME minv => SOME(M.mul minv yy)
+            | NONE => attack_alt 1
+          else NONE
       end
 end;
 
@@ -265,7 +268,7 @@ struct
       else
         N(y, flag, children) :: insert [x] rest
     | insert (x::xs) [] = [N(x, false, insert xs [])]
-    | insert (x::xs) (N(y, flag, children)::rest) =
+    | insert (x::xs) (N(y, flag, children) :: rest) =
       case (x = y, xs, children) of
         (true, [], _) =>
           N(y, true, []) :: rest
@@ -284,15 +287,15 @@ struct
 
 
   (* fun printt [] = print ""
-  | printt (N (c, b, children) :: rest) = (
-      print ("N (#\"" ^ Char.toString c ^ "\"," ^ Bool.toString b ^ ", [");
-      printt children;
-      print "])";
-      if not (null children) andalso not (null rest) then
-        print ", "
-      else ();
-      printt rest
-    ) *)
+    | printt (N (c, b, children) :: rest) = (
+        print ("N (#\"" ^ Char.toString c ^ "\"," ^ Bool.toString b ^ ", [");
+        printt children;
+        print "])";
+        if not (null children) andalso not (null rest) then
+          print ", "
+        else ();
+        printt rest
+      ) *)
 end;
 
 signature HILLCIPHER =
