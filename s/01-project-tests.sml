@@ -251,16 +251,16 @@ val _ = (all_tests := !all_tests @ [test1, test2, test3, test4, test5, test6, te
 val _ : ''a list -> ''a Trie.dict -> ''a Trie.dict = Trie.insert;
 val t = Trie.insert (String.explode "Anamaria") Trie.empty;
 val test1 = t =
-  [N (#"A",false, [N (#"n",false, [N (#"a",false, [N (#"m",false, [N (#"a",false, [N (#"r",false,[N (#"i",false,[N (#"a",true,[])])])])])])])])];
+  [Trie.N (#"A",false, [Trie.N (#"n",false, [Trie.N (#"a",false, [Trie.N (#"m",false, [Trie.N (#"a",false, [Trie.N (#"r",false,[Trie.N (#"i",false,[Trie.N (#"a",true,[])])])])])])])])];
 val t = Trie.insert (String.explode "Ana") t;
 val test2 = t =
-  [N (#"A",false, [N (#"n",false, [N (#"a",true, [N (#"m",false, [N (#"a",false, [N (#"r",false,[N (#"i",false,[N (#"a",true,[])])])])])])])])]
+  [Trie.N (#"A",false, [Trie.N (#"n",false, [Trie.N (#"a",true, [Trie.N (#"m",false, [Trie.N (#"a",false, [Trie.N (#"r",false,[Trie.N (#"i",false,[Trie.N (#"a",true,[])])])])])])])])]
 val t = Trie.insert (String.explode "Alice") t;
-val test3 = t = [N (#"A",false, [N (#"n",false, [N (#"a",true, [N (#"m",false, [N (#"a",false, [N (#"r",false,[N (#"i",false,[N (#"a",true,[])])])])])])]), N (#"l",false,[N (#"i",false,[N (#"c",false,[N (#"e",true,[])])])])])]
+val test3 = t = [Trie.N (#"A",false, [Trie.N (#"n",false, [Trie.N (#"a",true, [Trie.N (#"m",false, [Trie.N (#"a",false, [Trie.N (#"r",false,[Trie.N (#"i",false,[Trie.N (#"a",true,[])])])])])])]), Trie.N (#"l",false,[Trie.N (#"i",false,[Trie.N (#"c",false,[Trie.N (#"e",true,[])])])])])]
 val t = Trie.insert (String.explode "Alan") t;
-val test4 = t = [N (#"A",false, [N (#"n",false, [N (#"a",true, [N (#"m",false, [N (#"a",false, [N (#"r",false,[N (#"i",false,[N (#"a",true,[])])])])])])]), N (#"l",false, [N (#"i",false,[N (#"c",false,[N (#"e",true,[])])]), N (#"a",false,[N (#"n",true,[])])])])]
+val test4 = t = [Trie.N (#"A",false, [Trie.N (#"n",false, [Trie.N (#"a",true, [Trie.N (#"m",false, [Trie.N (#"a",false, [Trie.N (#"r",false,[Trie.N (#"i",false,[Trie.N (#"a",true,[])])])])])])]), Trie.N (#"l",false, [Trie.N (#"i",false,[Trie.N (#"c",false,[Trie.N (#"e",true,[])])]), Trie.N (#"a",false,[Trie.N (#"n",true,[])])])])]
 val t = Trie.insert [#"A"] t;
-val test5 = t = [N (#"A",true, [N (#"n",false, [N (#"a",true, [N (#"m",false, [N (#"a",false, [N (#"r",false,[N (#"i",false,[N (#"a",true,[])])])])])])]), N (#"l",false, [N (#"i",false,[N (#"c",false,[N (#"e",true,[])])]), N (#"a",false,[N (#"n",true,[])])])])]
+val test5 = t = [Trie.N (#"A",true, [Trie.N (#"n",false, [Trie.N (#"a",true, [Trie.N (#"m",false, [Trie.N (#"a",false, [Trie.N (#"r",false,[Trie.N (#"i",false,[Trie.N (#"a",true,[])])])])])])]), Trie.N (#"l",false, [Trie.N (#"i",false,[Trie.N (#"c",false,[Trie.N (#"e",true,[])])]), Trie.N (#"a",false,[Trie.N (#"n",true,[])])])])]
 val _ = (all_tests := !all_tests @ [test1, test2, test3, test4, test5]);
 
 val _ = print "---------- lookup ----------\n";
