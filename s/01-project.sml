@@ -221,7 +221,8 @@ struct
             in 
               case xinv_ of
                 (* SOME minv => if M.mul x (M.mul minv my_) = y then SOME (M.mul minv my_) else attack_alt (rows + 1) *)
-                SOME minv => SOME (M.mul minv my_)
+                (* SOME minv => SOME (M.mul minv my_) *)
+                SOME minv => SOME (M.mul minv (M.mul (M.tr x_) y_))
               | NONE => 
                 if rows < length x andalso rows < length y then 
                   attack_alt (rows+1)
@@ -239,7 +240,7 @@ struct
                           SOME minv' => if M.mul x (M.mul minv' y) = y then SOME(M.mul minv' y) else NONE
                         | NONE => NONE                       *)
             case xinv of
-              SOME minv => SOME(M.mul minv yy)
+              SOME minv => SOME (M.mul minv yy)
             | NONE => attack_alt 1
           else NONE
       end
