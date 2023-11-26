@@ -272,7 +272,8 @@ struct
       else
         N(y, flag, children) :: insert (x::xs) rest
 
-  fun lookup [] _ = false
+  fun lookup [] [] = true
+    | lookup [] _ = false
     | lookup _ [] = false
     | lookup [x] (N(y, flag, _) :: _) = x = y andalso flag
     | lookup (x::xs) (N(y, _, children) :: rest) =
@@ -280,17 +281,6 @@ struct
         lookup xs children
       else
         lookup (x::xs) rest
-
-  (* fun printt [] = print ""
-    | printt (N (c, b, children) :: rest) = (
-        print ("N (#\"" ^ Char.toString c ^ "\"," ^ Bool.toString b ^ ", [");
-        printt children;
-        print "])";
-        if not (null children) andalso not (null rest) then
-          print ", "
-        else ();
-        printt rest
-      ) *)
 end;
 
 signature HILLCIPHER =
