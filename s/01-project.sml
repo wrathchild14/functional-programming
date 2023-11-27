@@ -262,7 +262,6 @@ struct
   val empty = [] : ''a dict
 
   fun insert [] dict = dict
-    | insert (x::xs) [] = [N(x, null xs, insert xs [])]
     | insert (x::xs) (N(y, flag, children) :: rest) =
       if x = y then
         if null xs then
@@ -271,6 +270,7 @@ struct
           N(y, flag, insert xs children) :: rest
       else
         N(y, flag, children) :: insert (x::xs) rest
+    | insert (x::xs) dict = [N(x, null xs, insert xs dict)]
 
   fun lookup [] [] = true
     | lookup [] _ = false
