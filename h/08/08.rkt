@@ -63,5 +63,11 @@
     )
   )
 
-(fri (?int (int 5)))
-(fri (if-then-else (true) (int 5) (add (int 2) (int "a"))))
+(define-syntax ?geq
+  (syntax-rules ()
+    [(_ e1 e2) (?leq e2 e1)]
+    )
+  )
+
+(define (conditional)
+  '())
