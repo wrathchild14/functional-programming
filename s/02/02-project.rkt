@@ -44,7 +44,7 @@
            [e2 (..-e2 expr)])
        (let ([v1 (fri e1 env)])
          (let ([v2 (fri e2 env)])
-           (cons v1 v2))))]
+           (.. v1 v2))))]
     [(exception? expr) (triggered expr)]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
@@ -77,21 +77,23 @@
      (let ([b (fri (?bool-x expr) env)])
        (if (triggered? b) b (if (or (eq? b (true)) (eq? b (false))) (true) (false))))]
     [(?..? expr)
-     (let ([dots (fri (?..-x expr) env)])
-       (if (triggered? dots) dots (if (pair? dots) (true) (false))))]
+     (let ([v (fri (?..-x expr) env)])
+       (cond
+         [(triggered? v) v]
+         [(pair? v) (true)]
+         [else (false)]))]
     [(?seq? expr)
      (let ([s (fri (?seq-x expr) env)])
        (cond
          [(triggered? s) s]
          [(empty? s) (true)]
-         [(..? s)
-          (let ([v1 (..-e1 s)]
+         [(let ([v1 (..-e1 s)]
                 [v2 (..-e2 s)])
             (if (empty? v2)
                 (true)
-                (let ([result (fri (?seq v2) env)])
-                  (if (triggered? result) result (false)))))]
+                (fri (?seq v2) env)))]
          [else (false)]))]
+    [(empty? expr) expr]
     [(?empty? expr)
      (let ([e (fri (?empty-x expr) env)])
        (if (triggered? e) e (if (empty? e) (true) (false))))]
