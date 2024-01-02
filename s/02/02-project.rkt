@@ -45,24 +45,22 @@
        (let ([v1 (fri e1 env)])
          (let ([v2 (fri e2 env)])
            (.. v1 v2))))]
-    [(exception? expr) (triggered expr)]
+    [(exception? expr) expr]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
-       (if (triggered? v) v
-           (triggered (exception "trigger: wrong argument type"))))]
-    [(handle? expr)
-     (let ([e1 (handle-e1 expr)]
-           [e2 (handle-e2 expr)]
-           [e3 (handle-e3 expr)])
-       (let ([v (fri e1 env)])
-         (cond
-           [(exception? v) v]
-           [(triggered? v)
-            (let ([v2 (fri e2 env)])
-              (if (triggered? v2)
-                  (if (equal? v2 v) (fri e3 env) v2)
-                  (fri e3 env)))]
-           [else (triggered (exception "handle: wrong argument type"))])))]
+       (cond [(triggered? v) v]
+             [(exception? v) (triggered v)]
+             [else (triggered (exception "trigger: wrong argument type"))]))]
+    [(handle? expr) (let ([e1 (fri (handle-e1 expr) env)]
+                          [e2 (fri (handle-e2 expr) env)]
+                          [e3 (fri (handle-e3 expr) env)])
+                      (if (triggered? e1)
+                          e1
+                          (if (exception? e1)
+                              (if (and (triggered? e2) (equal? (exception-exn e1) (exception-exn (triggered-exn e2))))
+                                  e3
+                                  e2)
+                              (triggered (exception "handle: wrong argument type")))))]
     [(if-then-else? expr)
      (let ([cond (if-then-else-cond expr)]
            [e1 (if-then-else-e1 expr)]
