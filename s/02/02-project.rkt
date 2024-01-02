@@ -13,14 +13,12 @@
 (struct false () #:transparent)
 (struct int (n) #:transparent)
 (struct exception (exn) #:transparent)
+(struct .. (e1 e2) #:transparent)
 
 (struct trigger (exn) #:transparent)
 (struct triggered (exn) #:transparent)
 
 (struct handle (e1 e2 e3) #:transparent)
-
-(define-syntax-rule (.. e1 e2)
-  (cons e1 e2))
 
 (define empty '())
 
@@ -29,6 +27,12 @@
     [(true? expr) #t]
     [(false? expr) #f]
     [(int? expr) expr]
+    [(..? expr)
+     (let ([e1 (..-e1 expr)]
+           [e2 (..-e2 expr)])
+       (let ([v1 (fri e1 env)])
+         (let ([v2 (fri e2 env)])
+           (cons v1 v2))))]
     [(exception? expr) (raise (exception-exn expr))]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
@@ -36,7 +40,7 @@
          [(triggered? v) (triggered v)]
          [(exception? v) (triggered (exception-exn v))]
          [else (triggered? (exception "trigger: wrong argument type"))]))]
-    [(handle? expr) ; Check for handle
+    [(handle? expr)
      (let ([e1 (handle-e1 expr)]
            [e2 (handle-e2 expr)]
            [e3 (handle-e3 expr)])
