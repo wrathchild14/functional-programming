@@ -13,14 +13,14 @@
 (struct false () #:transparent)
 (struct int (n) #:transparent)
 (struct exception (exn) #:transparent)
+
 (struct .. (e1 e2) #:transparent)
+(define empty '())
 
 (struct trigger (exn) #:transparent)
 (struct triggered (exn) #:transparent)
-
 (struct handle (e1 e2 e3) #:transparent)
-
-(define empty '())
+(struct if-then-else (cond e1 e2) #:transparent)
 
 (define (fri expr env)
   (cond
@@ -53,6 +53,13 @@
                   (if (equal? v2 v) (fri e3 env) v2)
                   (fri e3 env)))]
            [else (triggered (exception "handle: wrong argument type"))])))]
+    [(if-then-else? expr)
+     (let ([cond (if-then-else-cond expr)]
+           [e1 (if-then-else-e1 expr)]
+           [e2 (if-then-else-e2 expr)])
+       (match (fri cond env)
+         [#f (fri e2 env)]
+         [_ (fri e1 env)]))]
     [else (error "Expression not found")]
     )
   )
