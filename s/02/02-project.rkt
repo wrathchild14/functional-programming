@@ -31,8 +31,8 @@
 
 (define (fri expr env)
   (cond
-    [(true? expr) #t]
-    [(false? expr) #f]
+    [(true? expr) expr]
+    [(false? expr) expr]
     [(int? expr) expr]
     [(..? expr)
      (let ([e1 (..-e1 expr)]
