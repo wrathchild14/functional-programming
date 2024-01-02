@@ -4,7 +4,7 @@
          trigger triggered handle
          if-then-else
          ?int ?bool ?.. ?seq ?empty ?exception
-         ;  add mul ?leq ?= head tail ~ ?all ?any
+         add mul ?leq ?= ; head tail ~ ?all ?any
          ;  vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
@@ -28,6 +28,11 @@
 (struct ?seq (x) #:transparent)
 (struct ?empty (x) #:transparent)
 (struct ?exception (x) #:transparent)
+
+(struct add (e1 e2) #:transparent)
+(struct mul (e1 e2) #:transparent)
+(struct ?leq (e1 e2) #:transparent)
+(struct ?= (e1 e2) #:transparent)
 
 (define (fri expr env)
   (cond
@@ -93,6 +98,43 @@
     [(?exception? expr)
      (let ([ex (fri (?exception-x expr) env)])
        (if (triggered? ex) ex (if (exception? ex) (true) (false))))]
+    [(add? expr)
+     (let ([e1 (add-e1 expr)]
+           [e2 (add-e2 expr)])
+       (let ([v1 (fri e1 env)]
+             [v2 (fri e2 env)])
+         (cond
+           [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
+            (if (or (true? v1) (true? v2)) (true) (false))]
+           [(and (int? v1) (int? v2)) (int (+ (int-n v1) (int-n v2)))]
+           [(and (?seq? v1) (?seq? v2)) (append v1 v2)]
+           [else (triggered (exception "add: wrong argument type"))])))]
+    [(mul? expr)
+     (let ([e1 (mul-e1 expr)]
+           [e2 (mul-e2 expr)])
+       (let ([v1 (fri e1 env)]
+             [v2 (fri e2 env)])
+         (cond
+           [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
+            (if (and (true? v1) (true? v2)) (true) (false))]
+           [(and (int? v1) (int? v2)) (int (* (int-n v1) (int-n v2)))]
+           [else (triggered (exception "mul: wrong argument type"))])))]
+    [(?leq? expr)
+     (let ([e1 (?leq-e1 expr)]
+           [e2 (?leq-e2 expr)])
+       (let ([v1 (fri e1 env)]
+             [v2 (fri e2 env)])
+         (cond
+           [(or (eq? v1 (true)) (eq? v2 (true))) (true)]
+           [(and (int? v1) (int? v2)) (<= v1 v2)]
+           [(?seq? v1) (= (length v1) (length v2))]
+           [else (triggered (exception "?leq: wrong argument type"))])))]
+    [(?= expr)
+     (let ([e1 (?=-e1 expr)]
+           [e2 (?=-e2 expr)])
+       (let ([v1 (fri e1 env)]
+             [v2 (fri e2 env)])
+         (if (equal? v1 v2) (true) (false))))]
     [else (error "Expression not found")]
     )
   )
