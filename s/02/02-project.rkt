@@ -44,7 +44,11 @@
            [e2 (..-e2 expr)])
        (let ([v1 (fri e1 env)])
          (let ([v2 (fri e2 env)])
-           (.. v1 v2))))]
+           (cond
+             [(triggered? v1) v1]
+             [(triggered? v2) v2]
+             [(and (empty? v1) (empty? v2)) (empty)]
+             [else (.. v1 v2)]))))]
     [(exception? expr) expr]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
@@ -85,7 +89,8 @@
        (cond
          [(triggered? s) s]
          [(empty? s) (true)]
-         [(let ([v1 (..-e1 s)]
+         [(..? s)
+          (let (
                 [v2 (..-e2 s)])
             (if (empty? v2)
                 (true)
