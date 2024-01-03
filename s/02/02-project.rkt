@@ -4,7 +4,7 @@
          trigger triggered handle
          if-then-else
          ?int ?bool ?.. ?seq ?empty ?exception
-         add mul ?leq ?= head tail ; ~ ?all ?any
+         add mul ?leq ?= head tail ~ ?all ?any
          ;  vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
@@ -36,6 +36,10 @@
 
 (struct head (e) #:transparent)
 (struct tail (e) #:transparent)
+
+(struct ~ (e) #:transparent)
+(struct ?all (e) #:transparent)
+(struct ?any (e) #:transparent)
 
 (define (fri expr env)
   (cond
@@ -171,6 +175,28 @@
                         (fri e2 env)))]
          [else (triggered (exception "tail: wrong argument type"))]
          ))]
+    [(~? expr)
+     (cond
+       [(int? expr) (int (- (int-e expr)))]
+       [(true? expr) (int 1)]
+       [(false? expr) (int 0)]
+       [else (triggered (exception "~: wrong argument type"))])]
+    [(?all? expr)
+     (cond
+       [(?seq? expr)
+        (let ([res (fri expr env)])
+          (if (triggered? res)
+              res
+              (not (memv (false) res))))]  ; if false exists
+       [else (triggered (exception "?all: wrong argument type"))])]
+    [(?any? expr)
+     (cond
+       [(?seq? expr)
+        (let ([res (fri expr env)])
+          (if (triggered? res)
+              res
+              (not (null? (memv #f res)))))]  ; if non false exists
+       [else (triggered (exception "?any: wrong argument type"))])]
     [(?= expr)
      (let ([e1 (?=-e1 expr)]
            [e2 (?=-e2 expr)])
