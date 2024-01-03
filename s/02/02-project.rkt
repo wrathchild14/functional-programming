@@ -104,10 +104,20 @@
        (let ([v1 (fri e1 env)]
              [v2 (fri e2 env)])
          (cond
+           [(triggered? v1) v1]
+           [(triggered? v2) v2]
            [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
             (if (or (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (+ (int-n v1) (int-n v2)))]
-           [(and (?seq? v1) (?seq? v2)) (append v1 v2)]
+           ; from v1, rec insert first till not empty
+           [(and (..? v1) (..? v2))
+            (let loop ([lst v1])
+              (if (empty? lst)
+                  v2
+                  (let ([first (..-e1 lst)]
+                        [rest (..-e2 lst)])
+                    (.. first (loop rest)))))]
+           [(and (empty? v1) (empty? v2)) v1]
            [else (triggered (exception "add: wrong argument type"))])))]
     [(mul? expr)
      (let ([e1 (mul-e1 expr)]
