@@ -4,7 +4,7 @@
          trigger triggered handle
          if-then-else
          ?int ?bool ?.. ?seq ?empty ?exception
-         add mul ?leq ?= ; head tail ~ ?all ?any
+         add mul ?leq ?= head tail ; ~ ?all ?any
          ;  vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
@@ -34,6 +34,9 @@
 (struct ?leq (e1 e2) #:transparent)
 (struct ?= (e1 e2) #:transparent)
 
+(struct head (e) #:transparent)
+(struct tail (e) #:transparent)
+
 (define (fri expr env)
   (cond
     [(true? expr) expr]
@@ -47,7 +50,7 @@
            (cond
              [(triggered? v1) v1]
              [(triggered? v2) v2]
-             [(and (empty? v1) (empty? v2)) (empty)]
+             [(and (empty? v1) (empty? v2)) v1]
              [else (.. v1 v2)]))))]
     [(exception? expr) expr]
     [(trigger? expr)
@@ -144,6 +147,30 @@
            [(and (int? v1) (int? v2)) (<= v1 v2)]
            [(?seq? v1) (= (length v1) (length v2))]
            [else (triggered (exception "?leq: wrong argument type"))])))]
+    ; test with add fails, not sure if head or add (with seqs) is wrong
+    [(head? expr)
+     (let ([e (fri (head-e expr) env)])
+       (cond
+         [(triggered? e) e]
+         [(empty? e) e]
+         [(..? e)
+          (let ([e1 (..-e1 e)])
+            (if (empty? e1)
+                (triggered (exception "head: empty sequence"))
+                (fri e1 env)))]
+         [else (triggered (exception "head: wrong argument type"))]
+         ))]
+    [(tail? expr)
+     (let ([e (fri (tail-e expr) env)])
+       (cond
+         [(triggered? e) e]
+         [(empty? e) (triggered (exception "tail: empty sequence"))]
+         [(..? e) (let ([e2 (..-e2 e)])
+                    (if (empty? e2)
+                        e2
+                        (fri e2 env)))]
+         [else (triggered (exception "tail: wrong argument type"))]
+         ))]
     [(?= expr)
      (let ([e1 (?=-e1 expr)]
            [e2 (?=-e2 expr)])
