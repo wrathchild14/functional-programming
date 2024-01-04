@@ -54,7 +54,6 @@
            (cond
              [(triggered? v1) v1]
              [(triggered? v2) v2]
-             [(and (empty? v1) (empty? v2)) v1]
              [else (.. v1 v2)]))))]
     [(exception? expr) expr]
     [(trigger? expr)
@@ -97,8 +96,7 @@
          [(triggered? s) s]
          [(empty? s) (true)]
          [(..? s)
-          (let (
-                [v2 (..-e2 s)])
+          (let ([v2 (..-e2 s)])
             (if (empty? v2)
                 (true)
                 (fri (?seq v2) env)))]
