@@ -120,7 +120,7 @@
             (if (or (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (+ (int-e v1) (int-e v2)))]
            ; from v1, rec insert first till not empty
-           [(and (..? v1) (..? v2))
+           [(and (and (true? (fri (?seq v1) env))) (and (true) (fri (?seq v2) env)))
             (let loop ([lst v1])
               (if (empty? lst)
                   v2
