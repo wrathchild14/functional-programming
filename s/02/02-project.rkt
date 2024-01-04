@@ -149,7 +149,10 @@
          (cond
            [(or (eq? v1 (true)) (eq? v2 (true))) (true)]
            [(and (int? v1) (int? v2)) (<= v1 v2)]
-           [(?seq? v1) (= (length v1) (length v2))]
+           ;  [(?seq? v1) (= (length v1) (length v2))]
+           [(and (empty? v1) (empty? v2)) (true)]
+           [(empty? v2) (false)]
+           [(empty? v1) (true)]
            [else (triggered (exception "?leq: wrong argument type"))])))]
     ; test with add fails, not sure if head or add (with seqs) is wrong
     [(head? expr)
@@ -182,27 +185,30 @@
        [(false? expr) (int 0)]
        [else (triggered (exception "~: wrong argument type"))])]
     [(?all? expr)
-     (cond
-       [(?seq? expr)
-        (let ([res (fri expr env)])
-          (if (triggered? res)
-              res
-              (not (memv (false) res))))]  ; if false exists
-       [else (triggered (exception "?all: wrong argument type"))])]
+     (let ([v (fri (?all-e expr) env)])
+       (cond
+         [(?seq? v)
+          (if (false? (..-e1 v)) (false) (fri (?all (..-e2 v)) env))]
+         [(empty? v) (true)]
+         [else (triggered (exception "?all: wrong argument type"))]
+         ))]
     [(?any? expr)
-     (cond
-       [(?seq? expr)
-        (let ([res (fri expr env)])
-          (if (triggered? res)
-              res
-              (not (null? (memv #f res)))))]  ; if non false exists
-       [else (triggered (exception "?any: wrong argument type"))])]
-    [(?= expr)
+     (let ([v (fri (?any-e expr) env)])
+       (cond
+         [(?seq? v)
+          (if (true? (..-e1 v)) (true) (fri (?all (..-e2 v)) env))]
+         [(empty? v) (false)]
+         [else (triggered (exception "?any: wrong argument type"))]))]
+    [(?=? expr)
      (let ([e1 (?=-e1 expr)]
            [e2 (?=-e2 expr)])
        (let ([v1 (fri e1 env)]
              [v2 (fri e2 env)])
-         (if (equal? v1 v2) (true) (false))))]
+         (cond
+           [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
+           [(and (int? v1) (int? v2) (not (= (int-e v1) (int-e v2)))) (false)]
+           [(and (?seq? v1) (?seq? v2)) (if (fri (?= (..-e1 v1) (..-e1 v2)) env) (fri (?= (..-e2 v1) (..-e2 v2)) env) (false))]
+           [else (true)])))]
     [else (error "Expression not found")]
     )
   )
