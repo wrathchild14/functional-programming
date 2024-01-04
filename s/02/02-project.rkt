@@ -61,16 +61,17 @@
        (cond [(triggered? v) v]
              [(exception? v) (triggered v)]
              [else (triggered (exception "trigger: wrong argument type"))]))]
-    [(handle? expr) (let ([e1 (fri (handle-e1 expr) env)]
-                          [e2 (fri (handle-e2 expr) env)]
-                          [e3 (fri (handle-e3 expr) env)])
-                      (if (triggered? e1)
-                          e1
-                          (if (exception? e1)
-                              (if (and (triggered? e2) (equal? (exception-exn e1) (exception-exn (triggered-exn e2))))
-                                  e3
-                                  e2)
-                              (triggered (exception "handle: wrong argument type")))))]
+    [(handle? expr)
+     (let ([e1 (fri (handle-e1 expr) env)]
+           [e2 (fri (handle-e2 expr) env)]
+           [e3 (fri (handle-e3 expr) env)])
+       (if (triggered? e1)
+           e1
+           (if (exception? e1)
+               (if (and (triggered? e2) (equal? (exception-exn e1) (exception-exn (triggered-exn e2))))
+                   e3
+                   e2)
+               (triggered (exception "handle: wrong argument type")))))]
     [(if-then-else? expr)
      (let ([cond (if-then-else-cond expr)]
            [e1 (if-then-else-e1 expr)]
@@ -120,7 +121,7 @@
             (if (or (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (+ (int-e v1) (int-e v2)))]
            ; from v1, rec insert first till not empty
-           [(and (and (true? (fri (?seq v1) env))) (and (true) (fri (?seq v2) env)))
+           [(and (true? (fri (?seq v1) env)) (true) (fri (?seq v2) env))
             (let loop ([lst v1])
               (if (empty? lst)
                   v2
@@ -149,12 +150,10 @@
          (cond
            [(or (eq? v1 (true)) (eq? v2 (true))) (true)]
            [(and (int? v1) (int? v2)) (<= v1 v2)]
-           ;  [(?seq? v1) (= (length v1) (length v2))]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
            [else (triggered (exception "?leq: wrong argument type"))])))]
-    ; test with add fails, not sure if head or add (with seqs) is wrong
     [(head? expr)
      (let ([e (fri (head-e expr) env)])
        (cond
@@ -165,8 +164,7 @@
             (if (empty? e1)
                 (triggered (exception "head: empty sequence"))
                 (fri e1 env)))]
-         [else (triggered (exception "head: wrong argument type"))]
-         ))]
+         [else (triggered (exception "head: wrong argument type"))]))]
     [(tail? expr)
      (let ([e (fri (tail-e expr) env)])
        (cond
@@ -176,8 +174,7 @@
                     (if (empty? e2)
                         e2
                         (fri e2 env)))]
-         [else (triggered (exception "tail: wrong argument type"))]
-         ))]
+         [else (triggered (exception "tail: wrong argument type"))]))]
     [(~? expr)
      (cond
        [(int? expr) (int (- (int-e expr)))]
@@ -190,8 +187,7 @@
          [(?seq? v)
           (if (false? (..-e1 v)) (false) (fri (?all (..-e2 v)) env))]
          [(empty? v) (true)]
-         [else (triggered (exception "?all: wrong argument type"))]
-         ))]
+         [else (triggered (exception "?all: wrong argument type"))]))]
     [(?any? expr)
      (let ([v (fri (?any-e expr) env)])
        (cond
@@ -207,8 +203,9 @@
          (cond
            [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
            [(and (int? v1) (int? v2) (not (= (int-e v1) (int-e v2)))) (false)]
-           [(and (?seq? v1) (?seq? v2)) (if (fri (?= (..-e1 v1) (..-e1 v2)) env) (fri (?= (..-e2 v1) (..-e2 v2)) env) (false))]
+           [(and (?seq? v1) (?seq? v2))
+            (if (fri (?= (..-e1 v1) (..-e1 v2)) env)
+                (fri (?= (..-e2 v1) (..-e2 v2)) env)
+                (false))]
            [else (true)])))]
-    [else (error "Expression not found")]
-    )
-  )
+    [else (error "Expression not found")]))
