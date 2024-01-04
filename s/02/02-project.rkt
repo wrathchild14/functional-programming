@@ -5,7 +5,7 @@
          if-then-else
          ?int ?bool ?.. ?seq ?empty ?exception
          add mul ?leq ?= head tail ~ ?all ?any
-         ;  vars valof fun proc closure call
+         vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
 
@@ -40,6 +40,13 @@
 (struct ~ (e) #:transparent)
 (struct ?all (e) #:transparent)
 (struct ?any (e) #:transparent)
+
+(struct vars (s e1 e2) #:transparent)
+(struct valof (s) #:transparent)
+(struct fun (name fargs body) #:transparent)
+(struct proc (name body) #:transparent)
+(struct closure (env name args body) #:transparent)
+(struct call (e args) #:transparent)
 
 (define (fri expr env)
   (cond
@@ -208,4 +215,77 @@
                 (fri (?= (..-e2 v1) (..-e2 v2)) env)
                 (false))]
            [else (true)])))]
+
+    [(vars? expr)
+     (let ([s (vars-s expr)]
+           [e1 (vars-e1 expr)]
+           [e2 (vars-e2 expr)])
+       (cond
+         [(list? s)
+          (let ([var-list (map car s)]
+                [val-list (map cdr s)])
+            (if (not (equal? (length var-list) (length (remove-duplicates var-list))))
+                (trigger (exception "vars: duplicate identifier"))
+                (let ([new-env (extend-env var-list val-list env)])
+                  (fri e2 new-env))))]
+
+         [else
+          (let ([v (fri e1 env)])
+            (let ([new-env (cons (cons s v) env)])
+              (fri e2 new-env)))]))]
+
+    [(valof? expr)
+     (let ([s (valof-s expr)])
+       (let ([v (lookup s env)])
+         (if (triggered? v)
+             v
+             (fri v env))))]
+
+    [(fun? expr)
+     (let ([name (fun-name expr)]
+           [fargs (fun-fargs expr)]
+           [body (fun-body expr)])
+       (if (and (symbol? name) (empty? name))
+           (closure env expr)
+           (closure env (fun name fargs body))))]
+
+    [(proc? expr)
+     (let ([name (proc-name expr)]
+           [body (proc-body expr)])
+       (proc env (proc name body)))]
+
+    [(call? expr)
+     (let ([e (call-e expr)]
+           [args (call-args expr)])
+       (let ([f (fri e env)])
+         (cond
+           [(closure? f)
+            (let ([fenv (closure-env f)]
+                  [fname (closure-name f)]
+                  [fargs (closure-args f)]
+                  [fbody (closure-body f)])
+              (let ([arg-names (map valof args)])
+                (if (not (= (length arg-names) (length fargs)))
+                    (trigger (exception "call: arity mismatch"))
+                    (let ([new-env (extend-env fargs arg-names fenv)])
+                      (let ([new-env (cons (cons fname f) new-env)])
+                        (fri fbody new-env))))))]
+           [(proc? f)
+            (let ([fname (proc-name f)]
+                  [fbody (proc-body f)])
+              (let ([new-env (cons (cons fname f) env)])
+                (fri fbody new-env)))]
+           [else (trigger (exception "call: wrong argument type"))])))]
     [else (error "Expression not found")]))
+
+(define (lookup var env)
+  (cond
+    [(empty? env) (trigger (exception "valof: undefined variable"))]
+    [(equal? (caar env) var) (cdar env)]
+    [else (lookup var (cdr env))]))
+
+(define (extend-env vars vals env)
+  (if (empty? vars)
+      env
+      (extend-env (cdr vars) (cdr vals)
+                  (cons (cons (car vars) (car vals)) env))))
