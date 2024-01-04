@@ -130,6 +130,8 @@
                         [rest (..-e2 lst)])
                     (.. first (loop rest)))))]
            [(and (empty? v1) (empty? v2)) v1]
+           [(and (..? v1) (empty? v2)) v1]
+           [(and (empty? v1) (..? v2)) v2]
            [else (triggered (exception "add: wrong argument type"))])))]
     [(mul? expr)
      (let ([e1 (mul-e1 expr)]
