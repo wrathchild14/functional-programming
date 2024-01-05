@@ -155,12 +155,15 @@
        (let ([v1 (fri e1 env)]
              [v2 (fri e2 env)])
          (cond
+           [(triggered? v1) v1]
+           [(triggered? v2) v2]
            [(or (eq? v1 (true)) (eq? v2 (true))) (true)]
            [(and (int? v1) (int? v2)) (<= v1 v2)]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
            [else (triggered (exception "?leq: wrong argument type"))])))]
+
     [(head? expr)
      (let ([e (fri (head-e expr) env)])
        (cond
@@ -191,6 +194,7 @@
     [(?all? expr)
      (let ([v (fri (?all-e expr) env)])
        (cond
+         [(triggered? v) v]
          [(?seq? v)
           (if (false? (..-e1 v)) (false) (fri (?all (..-e2 v)) env))]
          [(empty? v) (true)]
