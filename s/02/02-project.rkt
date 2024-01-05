@@ -240,7 +240,7 @@
           (let ([var-list (map car s)]
                 [val-list (map cdr s)])
             (if (not (equal? (length var-list) (length (remove-duplicates var-list))))
-                (trigger (exception "vars: duplicate identifier"))
+                (triggered (exception "vars: duplicate identifier"))
                 (let ([new-env (extend-env var-list val-list env)])
                   (fri e2 new-env))))]
 
@@ -281,7 +281,7 @@
                   [fbody (closure-body f)])
               (let ([arg-names (map valof args)])
                 (if (not (= (length arg-names) (length fargs)))
-                    (trigger (exception "call: arity mismatch"))
+                    (triggered (exception "call: arity mismatch"))
                     (let ([new-env (extend-env fargs arg-names fenv)])
                       (let ([new-env (cons (cons fname f) new-env)])
                         (fri fbody new-env))))))]
@@ -290,12 +290,12 @@
                   [fbody (proc-body f)])
               (let ([new-env (cons (cons fname f) env)])
                 (fri fbody new-env)))]
-           [else (trigger (exception "call: wrong argument type"))])))]
+           [else (triggered (exception "call: wrong argument type"))])))]
     [else (error "Expression not found")]))
 
 (define (lookup var env)
   (cond
-    [(empty? env) (trigger (exception "valof: undefined variable"))]
+    [(empty? env) (triggered (exception "valof: undefined variable"))]
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
