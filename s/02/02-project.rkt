@@ -45,7 +45,7 @@
 (struct valof (s) #:transparent)
 (struct fun (name fargs body) #:transparent)
 (struct proc (name body) #:transparent)
-(struct closure (env name args body) #:transparent)
+(struct closure (env f) #:transparent)
 (struct call (e args) #:transparent)
 
 (define (fri expr env)
@@ -248,41 +248,10 @@
              v
              (fri v env))))]
 
-    [(fun? expr)
-     (let ([name (fun-name expr)]
-           [fargs (fun-fargs expr)]
-           [body (fun-body expr)])
-       (if (and (symbol? name) (empty? name))
-           (closure env expr)
-           (closure env (fun name fargs body))))]
+    [(fun? expr) (closure env expr)]
 
-    [(proc? expr)
-     (let ([name (proc-name expr)]
-           [body (proc-body expr)])
-       (proc env (proc name body)))]
+    [(proc? expr) (closure env expr)]
 
-    [(call? expr)
-     (let ([e (call-e expr)]
-           [args (call-args expr)])
-       (let ([f (fri e env)])
-         (cond
-           [(closure? f)
-            (let ([fenv (closure-env f)]
-                  [fname (closure-name f)]
-                  [fargs (closure-args f)]
-                  [fbody (closure-body f)])
-              (let ([arg-names (map valof args)])
-                (if (not (= (length arg-names) (length fargs)))
-                    (triggered (exception "call: arity mismatch"))
-                    (let ([new-env (extend-env fargs arg-names fenv)])
-                      (let ([new-env (cons (cons fname f) new-env)])
-                        (fri fbody new-env))))))]
-           [(proc? f)
-            (let ([fname (proc-name f)]
-                  [fbody (proc-body f)])
-              (let ([new-env (cons (cons fname f) env)])
-                (fri fbody new-env)))]
-           [else (triggered (exception "call: wrong argument type"))])))]
     [else (error "Expression not found")]))
 
 (define (lookup var env)
@@ -290,9 +259,3 @@
     [(empty? env) (triggered (exception "valof: undefined variable"))]
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
-
-(define (extend-env vars vals env)
-  (if (empty? vars)
-      env
-      (extend-env (cdr vars) (cdr vals)
-                  (cons (cons (car vars) (car vals)) env))))
