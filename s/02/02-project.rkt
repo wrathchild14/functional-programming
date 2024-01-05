@@ -197,11 +197,12 @@
                         (fri e2 env)))]
          [else (triggered (exception "tail: wrong argument type"))]))]
     [(~? expr)
-     (cond
-       [(int? expr) (int (- (int-e expr)))]
-       [(true? expr) (int 1)]
-       [(false? expr) (int 0)]
-       [else (triggered (exception "~: wrong argument type"))])]
+     (let ([v (fri (~-e expr) env)])
+       (cond
+         [(int? v) (int (- (int-e v)))]
+         [(true? v) (int 1)]
+         [(false? v) (int 0)]
+         [else (triggered (exception "~: wrong argument type"))]))]
     [(?all? expr)
      (let ([v (fri (?all-e expr) env)])
        (cond
@@ -235,19 +236,10 @@
      (let ([s (vars-s expr)]
            [e1 (vars-e1 expr)]
            [e2 (vars-e2 expr)])
-       (cond
-         [(list? s)
-          (let ([var-list (map car s)]
-                [val-list (map cdr s)])
-            (if (not (equal? (length var-list) (length (remove-duplicates var-list))))
-                (triggered (exception "vars: duplicate identifier"))
-                (let ([new-env (extend-env var-list val-list env)])
-                  (fri e2 new-env))))]
-
-         [else
-          (let ([v (fri e1 env)])
-            (let ([new-env (cons (cons s v) env)])
-              (fri e2 new-env)))]))]
+       (if (and (list? s) (list? e1))
+           (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
+             (fri e2 (append new-vars env)))
+           (fri e2 (cons (cons s (fri e1 env)) env))))]
 
     [(valof? expr)
      (let ([s (valof-s expr)])
