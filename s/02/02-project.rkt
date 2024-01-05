@@ -157,12 +157,23 @@
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
-           [(or (eq? v1 (true)) (eq? v2 (true))) (true)]
+           [(or (and (true? v1) (false? v1)) (and (true? v2) (false? v2)))
+            (if (or (not (true? v1)) (true? v2))
+                (true)
+                (false))]
            [(and (int? v1) (int? v2)) (<= v1 v2)]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
-           [else (triggered (exception "?leq: wrong argument type"))])))]
+           [(and (?seq? v1) (?seq? v2))
+            (let loop ([seq1 v1] [seq2 v2])
+              (cond
+                [(and (empty? seq1) (empty? seq2)) (true)] ; equal length
+                [(empty? seq1) (true)] ; seq1 shorter than seq2
+                [(empty? seq2) (false)] ; seq2 shorter than seq1
+                [else (loop (tail seq1) (tail seq2))]))]
+           [else
+            (triggered (exception "?leq: wrong argument type"))])))]
 
     [(head? expr)
      (let ([e (fri (head-e expr) env)])
