@@ -8,6 +8,7 @@
          vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
+(define zip (lambda (l1 l2) (map list l1 l2)))
 
 (struct true () #:transparent)
 (struct false () #:transparent)
@@ -251,7 +252,29 @@
     [(fun? expr) (closure env expr)]
 
     [(proc? expr) (closure env expr)]
-
+    [(call? expr)
+     ; Handling function calls
+     (let ([e (call-e expr)]
+           [args (call-args expr)])
+       (let ([fun-env (fri e env)])
+         (cond
+           [(closure? fun-env)
+            (let ([fun (closure-f fun-env)]
+                  [fargs (fun-fargs fun)]
+                  [fun-body (fun-body fun)])
+              (let ([arg-names fargs]  ; Assuming fargs directly contains argument names
+                    [arg-values (map (lambda (arg) (fri arg env)) args)])
+                (if (= (length arg-names) (length arg-values))
+                    (let ([new-env (append (zip arg-names arg-values) (closure-env fun-env))])
+                      (fri fun-body new-env))
+                    (triggered (exception "call: arity mismatch")))))]
+           [(proc? fun-env)
+            (let ([proc-name (proc-name (closure-f fun-env))]
+                  [proc-body (proc-body (closure-f fun-env))])
+              (let ([new-env (cons (cons proc-name '()) env)]) ; Create a local environment with the procedure name
+                (fri proc-body new-env)))]
+           [else
+            (triggered (exception "call: wrong argument type"))])))]
     [else (error "Expression not found")]))
 
 (define (lookup var env)
