@@ -8,7 +8,6 @@
          vars valof fun proc closure call
          ;  greater rev binary filtering folding mapping
          fri)
-(define zip (lambda (l1 l2) (map list l1 l2)))
 
 (struct true () #:transparent)
 (struct false () #:transparent)
@@ -162,7 +161,7 @@
             (if (or (not (true? v1)) (true? v2))
                 (true)
                 (false))]
-           [(and (int? v1) (int? v2)) (<= v1 v2)]
+           [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
@@ -247,34 +246,41 @@
        (let ([v (lookup s env)])
          (if (triggered? v)
              v
-             (fri v env))))]
-
-    [(fun? expr) (closure env expr)]
+             (cond
+               [(closure? v) v]  ; return closure as is
+               [(fun? v) v]      ; return fun as is
+               [else (fri v env)]))))]
 
     [(proc? expr) (closure env expr)]
+
     [(call? expr)
-     ; Handling function calls
      (let ([e (call-e expr)]
            [args (call-args expr)])
        (let ([fun-env (fri e env)])
          (cond
            [(closure? fun-env)
             (let ([fun (closure-f fun-env)]
-                  [fargs (fun-fargs fun)]
-                  [fun-body (fun-body fun)])
-              (let ([arg-names fargs]  ; Assuming fargs directly contains argument names
-                    [arg-values (map (lambda (arg) (fri arg env)) args)])
-                (if (= (length arg-names) (length arg-values))
-                    (let ([new-env (append (zip arg-names arg-values) (closure-env fun-env))])
-                      (fri fun-body new-env))
-                    (triggered (exception "call: arity mismatch")))))]
-           [(proc? fun-env)
-            (let ([proc-name (proc-name (closure-f fun-env))]
-                  [proc-body (proc-body (closure-f fun-env))])
-              (let ([new-env (cons (cons proc-name '()) env)]) ; Create a local environment with the procedure name
-                (fri proc-body new-env)))]
+                  [fun-env (closure-env fun-env)])
+              (cond
+                [(fun? fun)
+                 (let ([name (fun-name fun)]
+                       [body (fun-body fun)]
+                       [arg-names (fun-fargs fun)])
+                   (let ([arg-values (map (lambda (arg) (fri arg env)) args)])
+                     (if (= (length arg-names) (length arg-values))
+                         (let ([new-env (append (list (cons name fun-env)) (append (map (lambda (i j) (cons i j)) arg-names arg-values) env))])
+                           (fri body new-env))
+                         (triggered (exception "call: arity mismatch")))))]
+                [(proc? fun)
+                 (let ([name (proc-name fun)]
+                       [body (proc-body fun)])
+                   (let ([new-env (cons (cons name '()) env)])
+                     (fri body new-env)))]
+                [else
+                 (triggered (exception "call: wrong argument type"))]))]
            [else
-            (triggered (exception "call: wrong argument type"))])))]
+            (triggered (exception "call: not a callable object"))])))]
+
     [else (error "Expression not found")]))
 
 (define (lookup var env)
