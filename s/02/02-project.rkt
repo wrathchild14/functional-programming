@@ -157,10 +157,10 @@
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
-           [(or (and (true? v1) (false? v1)) (and (true? v2) (false? v2)))
-            (if (or (not (true? v1)) (true? v2))
-                (true)
-                (false))]
+           [(and (false? v1) (false? v2)) (true)]
+           [(and (false? v1) (true? v2)) (true)]
+           [(and (true? v1) (false? v2)) (false)]
+           [(and (true? v1) (true? v2)) (true)]
            [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
@@ -252,6 +252,8 @@
                [else (fri v env)]))))]
 
     [(proc? expr) (closure env expr)]
+
+    [(fun? expr) (closure env expr)]
 
     [(call? expr)
      (let ([e (call-e expr)]
