@@ -6,7 +6,7 @@
          ?int ?bool ?.. ?seq ?empty ?exception
          add mul ?leq ?= head tail ~ ?all ?any
          vars valof fun proc closure call
-         ;  greater rev binary filtering folding mapping
+         greater rev binary filtering folding mapping
          fri)
 
 (struct true () #:transparent)
@@ -287,3 +287,21 @@
     [(empty? env) (triggered (exception "valof: undefined variable"))]
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
+
+(define (greater e1 e2)
+  '())
+
+(define (rev e)
+  '())
+
+(define (binary e1)
+  '())
+
+(define (mapping f seq)
+  '())
+
+(define (filtering f seq)
+  '())
+
+(define (folding f init seq)
+  '())

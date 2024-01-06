@@ -71,12 +71,12 @@
           null)
      (triggered (exception "fatal error"))))
 
-  ;  (test-case
-  ;   "handle 06"
-  ;   (check-equal?
-  ;    (fri (handle (head (.. (exception "error") (int 10)))
-  ;                 (exception "error") (int 2)) null)
-  ;    (exception "error")))
+   (test-case
+    "handle 06"
+    (check-equal?
+     (fri (handle (head (.. (exception "error") (int 10)))
+                  (exception "error") (int 2)) null)
+     (exception "error")))
 
    (test-case
     "handle 07"
@@ -380,89 +380,89 @@
           null)
      (true)))
    
-  ;  (test-case
-  ;   "long-long"
-  ;   (check-equal?
-  ;    (fri
-  ;     (vars "a" (int 10)
-  ;           (vars (list "f" "g")
-  ;                 (list (fun "" (list "a" "b")
-  ;                            (add (valof "a") (mul (int 5) (valof "b"))))
-  ;                       (fun "" (list "c")
-  ;                            (add (valof "a") (valof "c"))))
-  ;                 (vars (list "a" "d" "g" "e")
-  ;                       (list (int 1)
-  ;                             (call (valof "g") (list (int -9)))
-  ;                             (fun "" (list "x")
-  ;                                  (add (valof "a")
-  ;                                       (mul (valof "x")
-  ;                                            (call (valof "f")
-  ;                                                  (list (int 1) (valof "a"))))))
-  ;                             (fun "" (list "f" "x")
-  ;                                  (call (valof "f") (list (valof "x")))))
-  ;                       (vars (list "fib" "test" "unit-fun" "proc")
-  ;                             (list (fun "fib" (list "n")
-  ;                                        (if-then-else
-  ;                                         (?leq (valof "n") (int 2))
-  ;                                         (int 1)
-  ;                                         (add (call (valof "fib")
-  ;                                                    (list (add (valof "n")
-  ;                                                               (int -1))))
-  ;                                              (call (valof "fib")
-  ;                                                    (list (add (valof "n")
-  ;                                                               (int -2)))))))
-  ;                                   (fun "" (list "x")
-  ;                                        (add (valof "x") (int 2)))
+   (test-case
+    "long-long"
+    (check-equal?
+     (fri
+      (vars "a" (int 10)
+            (vars (list "f" "g")
+                  (list (fun "" (list "a" "b")
+                             (add (valof "a") (mul (int 5) (valof "b"))))
+                        (fun "" (list "c")
+                             (add (valof "a") (valof "c"))))
+                  (vars (list "a" "d" "g" "e")
+                        (list (int 1)
+                              (call (valof "g") (list (int -9)))
+                              (fun "" (list "x")
+                                   (add (valof "a")
+                                        (mul (valof "x")
+                                             (call (valof "f")
+                                                   (list (int 1) (valof "a"))))))
+                              (fun "" (list "f" "x")
+                                   (call (valof "f") (list (valof "x")))))
+                        (vars (list "fib" "test" "unit-fun" "proc")
+                              (list (fun "fib" (list "n")
+                                         (if-then-else
+                                          (?leq (valof "n") (int 2))
+                                          (int 1)
+                                          (add (call (valof "fib")
+                                                     (list (add (valof "n")
+                                                                (int -1))))
+                                               (call (valof "fib")
+                                                     (list (add (valof "n")
+                                                                (int -2)))))))
+                                    (fun "" (list "x")
+                                         (add (valof "x") (int 2)))
                                   
-  ;                                   (fun "" null
-  ;                                        (add (add (valof "a")
-  ;                                                  (valof "a"))
-  ;                                             (valof "a")))
+                                    (fun "" null
+                                         (add (add (valof "a")
+                                                   (valof "a"))
+                                              (valof "a")))
                                   
-  ;                                   (proc ""
-  ;                                         (folding
-  ;                                          (fun "" (list "x" "acc")
-  ;                                               (mul (valof "x")
-  ;                                                    (valof "acc")))
-  ;                                          (int 1)
-  ;                                          (.. (valof "a")
-  ;                                              (.. (int 2)
-  ;                                                  (.. (int 3)
-  ;                                                      (.. (int 4)
-  ;                                                          (.. (call (valof "g")
-  ;                                                                    (list (int 5)))
-  ;                                                              (empty)))))))))
+                                    (proc ""
+                                          (folding
+                                           (fun "" (list "x" "acc")
+                                                (mul (valof "x")
+                                                     (valof "acc")))
+                                           (int 1)
+                                           (.. (valof "a")
+                                               (.. (int 2)
+                                                   (.. (int 3)
+                                                       (.. (int 4)
+                                                           (.. (call (valof "g")
+                                                                     (list (int 5)))
+                                                               (empty)))))))))
                               
                               
-  ;                             (.. (call (valof "unit-fun") null)
-  ;                                 (.. (call (valof "proc") null)
-  ;                                     (add (call (valof "g")
-  ;                                                (list (add (int 5)
-  ;                                                           (call (valof "test")
-  ;                                                                 (list (int 3))))))
-  ;                                          (add (valof "d")
-  ;                                               (add (call (valof "f")
-  ;                                                          (list (int -1) (int -2)))
-  ;                                                    (add (valof "a")
-  ;                                                         (add (call (valof "fib")
-  ;                                                                    (list (int 5)))
-  ;                                                              (call (valof "e")
-  ;                                                                    (list (valof "test") (int 3))))))))))))))
-  ;     null)
-  ;    (.. (int 3) (.. (int 6360) (int 521)))))
+                              (.. (call (valof "unit-fun") null)
+                                  (.. (call (valof "proc") null)
+                                      (add (call (valof "g")
+                                                 (list (add (int 5)
+                                                            (call (valof "test")
+                                                                  (list (int 3))))))
+                                           (add (valof "d")
+                                                (add (call (valof "f")
+                                                           (list (int -1) (int -2)))
+                                                     (add (valof "a")
+                                                          (add (call (valof "fib")
+                                                                     (list (int 5)))
+                                                               (call (valof "e")
+                                                                     (list (valof "test") (int 3))))))))))))))
+      null)
+     (.. (int 3) (.. (int 6360) (int 521)))))
 
 
-  ;  (test-case
-  ;   "binary"
-  ;   (check-equal?
-  ;    (fri (binary (add (int 10) (int 6))) null)
-  ;    (..
-  ;     (int 1)
-  ;     (..
-  ;      (int 0)
-  ;      (..
-  ;       (int 0)
-  ;       (.. (int 0) (.. (int 0) (empty))))))))
+   (test-case
+    "binary"
+    (check-equal?
+     (fri (binary (add (int 10) (int 6))) null)
+     (..
+      (int 1)
+      (..
+       (int 0)
+       (..
+        (int 0)
+        (.. (int 0) (.. (int 0) (empty))))))))
 
    (test-case
     "if-then-else"
@@ -470,19 +470,19 @@
      (fri (if-then-else (int 1) (int 2) (int 3)) null)
      (int 2)))
 
-  ;  (test-case
-  ;   "duplicate identifier -- you do NOT need to implement this"
-  ;   (check-equal?
-  ;    (fri (vars (list "a" "a" "a")
-  ;               (list (int 4) (int 5) (int 88))
-  ;               (valof "a")) null)
-  ;    (triggered (exception "vars: duplicate identifier"))))
+   (test-case
+    "duplicate identifier -- you do NOT need to implement this"
+    (check-equal?
+     (fri (vars (list "a" "a" "a")
+                (list (int 4) (int 5) (int 88))
+                (valof "a")) null)
+     (triggered (exception "vars: duplicate identifier"))))
 
-  ;  (test-case
-  ;   "duplicate argument identifier -- you do NOT need to implement this"
-  ;   (check-equal?
-  ;    (fri (fun "test" (list "a" "b" "c" "b") (int 1)) null)
-  ;    (triggered (exception "fun: duplicate argument identifier"))))
+   (test-case
+    "duplicate argument identifier -- you do NOT need to implement this"
+    (check-equal?
+     (fri (fun "test" (list "a" "b" "c" "b") (int 1)) null)
+     (triggered (exception "fun: duplicate argument identifier"))))
 
    (test-case
     "call 01"
@@ -599,35 +599,35 @@
                 (call (valof "d") (list))) null)
      (triggered (exception "valof: undefined variable"))))
 
-  ;  (test-case
-  ;   "last element of the sequence via macro folding 01"
-  ;   (check-equal?
-  ;    (fri (folding
-  ;          (fun "" (list "x" "y")
-  ;               (valof "x"))
-  ;          (exception "empty list")
-  ;          (.. (int 1) (.. (int 2) (.. (int 3) (empty)))))
-  ;         null)
-  ;    (int 3)))
+   (test-case
+    "last element of the sequence via macro folding 01"
+    (check-equal?
+     (fri (folding
+           (fun "" (list "x" "y")
+                (valof "x"))
+           (exception "empty list")
+           (.. (int 1) (.. (int 2) (.. (int 3) (empty)))))
+          null)
+     (int 3)))
 
-  ;  (test-case
-  ;   "last element of the sequence via macro folding 02"
-  ;   (check-equal?
-  ;    (fri (folding
-  ;          (fun "" (list "x" "y")
-  ;               (valof "x"))
-  ;          (exception "empty list")
-  ;          (empty))
-  ;         null)
-  ;    (exception "empty list")))
+   (test-case
+    "last element of the sequence via macro folding 02"
+    (check-equal?
+     (fri (folding
+           (fun "" (list "x" "y")
+                (valof "x"))
+           (exception "empty list")
+           (empty))
+          null)
+     (exception "empty list")))
 
-  ;  (test-case
-  ;   "concatination of sequences"
-  ;   (check-equal?
-  ;    (fri (rev (add (add (.. (int 2) (.. (int 3) (empty)))
-  ;                        (add (.. (int 2) (empty)) (empty)))
-  ;                   (add (.. (int 3) (empty)) (.. (empty) (empty))))) null)
-  ;    (.. (empty) (.. (int 3) (.. (int 2) (.. (int 3) (.. (int 2) (empty))))))))
+   (test-case
+    "concatination of sequences"
+    (check-equal?
+     (fri (rev (add (add (.. (int 2) (.. (int 3) (empty)))
+                         (add (.. (int 2) (empty)) (empty)))
+                    (add (.. (int 3) (empty)) (.. (empty) (empty))))) null)
+     (.. (empty) (.. (int 3) (.. (int 2) (.. (int 3) (.. (int 2) (empty))))))))
 
    (test-case
     "genearting list with procedures"
