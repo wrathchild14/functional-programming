@@ -256,32 +256,29 @@
     [(fun? expr) (closure env expr)]
 
     [(call? expr)
-     (let ([e (call-e expr)]
-           [args (call-args expr)])
-       (let ([fun-env (fri e env)])
-         (cond
-           [(closure? fun-env)
-            (let ([fun (closure-f fun-env)]
-                  [fun-env (closure-env fun-env)])
-              (cond
-                [(fun? fun)
-                 (let ([name (fun-name fun)]
-                       [body (fun-body fun)]
-                       [arg-names (fun-fargs fun)])
-                   (let ([arg-values (map (lambda (arg) (fri arg env)) args)])
-                     (if (= (length arg-names) (length arg-values))
-                         (let ([new-env (append (list (cons name fun-env)) (append (map (lambda (i j) (cons i j)) arg-names arg-values) env))])
-                           (fri body new-env))
-                         (triggered (exception "call: arity mismatch")))))]
-                [(proc? fun)
-                 (let ([name (proc-name fun)]
-                       [body (proc-body fun)])
-                   (let ([new-env (cons (cons name '()) env)])
-                     (fri body new-env)))]
-                [else
-                 (triggered (exception "call: wrong argument type"))]))]
-           [else
-            (triggered (exception "call: not a callable object"))])))]
+     (let ([e (fri (call-e expr) env)]
+           [args (map (lambda (val) (fri val env)) (call-args expr))])
+       (if (closure? e)
+           (let ([fun (closure-f e)]
+                 [fun-env (closure-env e)])
+             (cond
+               [(fun? fun)
+                (let ([name (fun-name fun)]
+                      [arg-names (fun-fargs fun)]
+                      [body (fun-body fun)])
+                  (let ([arg-values (map (lambda (arg) (fri arg env)) args)])
+                    (if (= (length arg-names) (length arg-values))
+                        (let ([new-env (append (list (cons name e)) (append (map (lambda (i j) (cons i j)) arg-names arg-values) fun-env))])
+                          (fri body new-env))
+                        (triggered (exception "call: arity mismatch")))))]
+               [(proc? fun)
+                (let ([name (proc-name fun)]
+                      [body (proc-body fun)])
+                  (let ([new-env (cons (cons name e) env)])
+                    (fri body new-env)))]
+               [else
+                (triggered (exception "call: wrong argument type"))]))
+           (triggered (exception "call: wrong argument type"))))]
 
     [else (error "Expression not found")]))
 
