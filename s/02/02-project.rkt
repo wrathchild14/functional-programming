@@ -50,9 +50,9 @@
 
 (define (fri expr env)
   (cond
-    [(true? expr) expr]
-    [(false? expr) expr]
-    [(int? expr) expr]
+    [(true? expr) (true)]
+    [(false? expr) (false)]
+    [(int? expr) (if (integer? (int-e expr)) expr (triggered (exception "int: wrong type")))]
     [(..? expr)
      (let ([e1 (..-e1 expr)]
            [e2 (..-e2 expr)])
@@ -63,7 +63,7 @@
              [(triggered? v2) v2]
              [else (.. v1 v2)]))))]
     [(empty? expr) (empty)]
-    [(exception? expr) expr]
+    [(exception? expr) (if (string? (exception-exn expr)) expr (triggered (exception "exception: wrong type")))]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
        (cond [(triggered? v) v]
@@ -88,7 +88,7 @@
        (if (triggered? n) n (if (int? n) (true) (false))))]
     [(?bool? expr)
      (let ([b (fri (?bool-e expr) env)])
-       (if (triggered? b) b (if (or (eq? b (true)) (eq? b (false))) (true) (false))))]
+       (if (triggered? b) b (if (or (true? b) (false? b)) (true) (false))))]
     [(?..? expr)
      (let ([v (fri (?..-e expr) env)])
        (cond
@@ -159,7 +159,8 @@
            [(and (false? v1) (true? v2)) (true)]
            [(and (true? v1) (false? v2)) (false)]
            [(and (true? v1) (true? v2)) (true)]
-           [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
+           [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
+          ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
@@ -292,8 +293,12 @@
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
-(define (greater e1 e2)
-  '())
+(define-syntax greater
+  (syntax-rules ()
+    [(greater e1 e2)
+     (if (true? (fri (?leq e1 e2) null))
+         (false)
+         (true))]))
 
 (define (rev e)
   '())
