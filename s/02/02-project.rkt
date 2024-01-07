@@ -253,7 +253,12 @@
                [(proc? v) v]
                [else (fri v env)]))))]
     [(proc? expr) (closure env expr)]
-    [(fun? expr) (closure env expr)]
+    [(fun? expr)
+     (let ([fargs (fun-fargs expr)])
+       (let ([unique-args-bool (equal? (length fargs) (length (remove-duplicates fargs)))])
+         (if (not unique-args-bool)
+             (triggered (exception "fun: duplicate argument identifier"))
+             (closure env expr))))]
     [(call? expr)
      (let ([e (fri (call-e expr) env)]
            [args (map (lambda (val) (fri val env)) (call-args expr))])
