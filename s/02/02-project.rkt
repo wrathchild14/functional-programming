@@ -287,7 +287,7 @@
 
 (define (lookup var env)
   (cond
-    [(empty? env) (triggered (exception "valof: undefined variable"))]
+    [(null? env) (triggered (exception "valof: undefined variable"))]
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
