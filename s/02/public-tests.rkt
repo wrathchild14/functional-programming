@@ -7,13 +7,13 @@
 (define all-tests
   (test-suite
    "pulic"
-    
+
    (test-case
     "add 01"
     (check-equal?
      (add (mul (true) (true)) (false))
      (add (mul (true) (true)) (false))))
- 
+
    (test-case
     "add 02"
     (check-equal?
@@ -34,7 +34,7 @@
                   (false))
           null)
      (false)))
-    
+
    (test-case
     "handle 02"
     (check-equal?
@@ -55,7 +55,7 @@
 
    (test-case
     "handle 04"
-    (check-equal? 
+    (check-equal?
      (fri (handle (int 1337)
                   (add (add (int 9) (int 9)) (int -1))
                   (false))
@@ -64,7 +64,7 @@
 
    (test-case
     "handle 05"
-    (check-equal? 
+    (check-equal?
      (fri (handle (trigger (exception "fatal error"))
                   (add (add (int 9) (int 9)) (int -1))
                   (false))
@@ -86,7 +86,7 @@
            (trigger (exception "error"))
            (int 2)) null)
      (int 2)))
-    
+
    (test-case
     "handle 08"
     (check-equal?
@@ -101,7 +101,7 @@
    (test-case
     "handle 09"
     (check-equal?
-     (fri (handle (trigger (exception "error")) (int 1) (int 2)) null) 
+     (fri (handle (trigger (exception "error")) (int 1) (int 2)) null)
      (triggered (exception "error"))))
 
    (test-case
@@ -139,7 +139,7 @@
     (check-equal?
      (trigger (exception "test"))
      (trigger (exception "test"))))
-   
+
    (test-case
     "tigger 16"
     (check-equal?
@@ -149,28 +149,28 @@
 
    (test-case
     "add forwarding the exception"
-    (check-equal? 
+    (check-equal?
      (fri (add (int 1) (trigger (exception "fatal error"))) null)
      (triggered (exception "fatal error"))))
 
    (test-case
     "trigger 01"
-    (check-equal? 
+    (check-equal?
      (fri (trigger (exception "fatal error")) null)
      (triggered (exception "fatal error"))))
-   
+
    (test-case
     "trigger in trigger"
     (check-equal?
      (fri (trigger (trigger (exception "tra-la-la hop-sa-sa"))) null)
      (triggered (exception "tra-la-la hop-sa-sa"))))
-    
+
    (test-case
     "?seq 01"
     (check-equal?
      (?seq (.. (int 1) (.. (int 2) (empty))))
      (?seq (.. (int 1) (.. (int 2) (empty))))))
-    
+
    (test-case
     "?seq 02"
     (check-equal?
@@ -201,12 +201,12 @@
     "?.."
     (check-equal? (fri (?.. (empty)) null)
                   (false)))
-  
+
    (test-case "add empty" (check-equal?
                            (fri (add (empty) (empty)) null)
                            (empty)))
 
-    
+
    (test-case
     "join sequences"
     (check-equal?
@@ -266,7 +266,7 @@
     (check-equal?
      (fri (tail (.. (int 4) (empty))) null)
      (empty)))
-    
+
    (test-case
     "tail 03"
     (check-equal? (fri (tail (empty)) null)
@@ -276,14 +276,14 @@
     "tail 04"
     (check-equal? (fri (tail (int 1)) null)
                   (triggered (exception "tail: wrong argument type"))))
- 
+
    (test-case
     "vars 01"
     (check-equal?
      (fri (vars "a" (add (mul (int 1) (int 2)) (mul (int -3) (int 4)))
                 (mul (valof "a") (valof "a"))) null)
      (int 100)))
-    
+
    (test-case
     "vars 02"
     (check-equal?
@@ -302,7 +302,7 @@
                       (.. (int 4) (int 4)))
                 (mul (valof "s1") (mul (valof "s2") (valof "s3")))) null)
      (triggered (exception "mul: wrong argument type"))))
-    
+
    (test-case
     "vars list 01"
     (check-equal?
@@ -317,7 +317,7 @@
                    (add (mul (valof "a") (valof "x1"))
                         (add (mul (valof "b") (valof "x2"))
                              (mul (valof "c") (valof "x3"))))))))
-    
+
    (test-case
     "call/fun recursive fibonacci"
     (check-equal?
@@ -362,7 +362,7 @@
     (check-equal?
      (fri (?any (.. (false) (.. (false) (int 1)))) null)
      (triggered (exception "?any: wrong argument type"))))
-   
+
    (test-case
     "?all mix"
     (check-equal?
@@ -379,7 +379,7 @@
                     (empty)))))
           null)
      (true)))
-   
+
    (test-case
     "long-long"
     (check-equal?
@@ -413,12 +413,12 @@
                                                                 (int -2)))))))
                                     (fun "" (list "x")
                                          (add (valof "x") (int 2)))
-                                  
+
                                     (fun "" null
                                          (add (add (valof "a")
                                                    (valof "a"))
                                               (valof "a")))
-                                  
+
                                     (proc ""
                                           (folding
                                            (fun "" (list "x" "acc")
@@ -432,8 +432,8 @@
                                                            (.. (call (valof "g")
                                                                      (list (int 5)))
                                                                (empty)))))))))
-                              
-                              
+
+
                               (.. (call (valof "unit-fun") null)
                                   (.. (call (valof "proc") null)
                                       (add (call (valof "g")
@@ -559,7 +559,7 @@
      (fri (vars "a" (trigger (exception "t"))
                 (trigger (exception "f"))) null)
      (triggered (exception "t"))))
- 
+
    (test-case
     "missing variable"
     (check-equal?
@@ -659,7 +659,7 @@
       null)
      (int -5005)))
 
-   
+
    (test-case
     "simple closure optimization"
     (check-equal?
@@ -693,11 +693,11 @@
     "nested vars + fun"
     (check-equal?
      (fri (vars "a" (int 5)
-             (vars (list "b" "c")
-                   (list (int 2)
-                         (fun "" (list) (valof "a")))
-                   (call (valof "c") (list))))
-       null)
+                (vars (list "b" "c")
+                      (list (int 2)
+                            (fun "" (list) (valof "a")))
+                      (call (valof "c") (list))))
+          null)
      (int 5)))
    ))
 

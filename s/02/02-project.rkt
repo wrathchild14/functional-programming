@@ -62,6 +62,7 @@
              [(triggered? v1) v1]
              [(triggered? v2) v2]
              [else (.. v1 v2)]))))]
+    [(empty? expr) (empty)]
     [(exception? expr) expr]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
@@ -69,16 +70,12 @@
              [(exception? v) (triggered v)]
              [else (triggered (exception "trigger: wrong argument type"))]))]
     [(handle? expr)
-     (let ([e1 (fri (handle-e1 expr) env)]
-           [e2 (fri (handle-e2 expr) env)]
-           [e3 (fri (handle-e3 expr) env)])
-       (if (triggered? e1)
-           e1
-           (if (exception? e1)
-               (if (and (triggered? e2) (equal? (exception-exn e1) (exception-exn (triggered-exn e2))))
-                   e3
-                   e2)
-               (triggered (exception "handle: wrong argument type")))))]
+     (let ([v1 (fri (handle-e1 expr) env)]
+           [v2 (fri (handle-e2 expr) env)]
+           [v3 (fri (handle-e3 expr) env)])
+       (if (triggered? v1) v1 (if (not (exception? v1)) (triggered (exception "handle: wrong argument type"))
+                                  (if (not (triggered? v2)) v2
+                                      (if (eq? (exception-exn v1) (exception-exn (triggered-exn v2))) v3 v2)))))]
     [(if-then-else? expr)
      (let ([cond (if-then-else-cond expr)]
            [e1 (if-then-else-e1 expr)]
@@ -96,7 +93,7 @@
      (let ([v (fri (?..-e expr) env)])
        (cond
          [(triggered? v) v]
-         [(pair? v) (true)]
+         [(..? v) (true)]
          [else (false)]))]
     [(?seq? expr)
      (let ([s (fri (?seq-e expr) env)])
@@ -109,10 +106,9 @@
                 (true)
                 (fri (?seq v2) env)))]
          [else (false)]))]
-    [(empty? expr) expr]
     [(?empty? expr)
-     (let ([e (fri (?empty-e expr) env)])
-       (if (triggered? e) e (if (empty? e) (true) (false))))]
+     (let ([v (fri (?empty-e expr) env)])
+       (if (triggered? v) v (if (empty? v) (true) (false))))]
     [(?exception? expr)
      (let ([ex (fri (?exception-e expr) env)])
        (if (triggered? ex) ex (if (exception? ex) (true) (false))))]
@@ -145,6 +141,8 @@
        (let ([v1 (fri e1 env)]
              [v2 (fri e2 env)])
          (cond
+           [(triggered? v1) v1]
+           [(triggered? v2) v2]
            [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
             (if (and (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (* (int-e v1) (int-e v2)))]
@@ -165,7 +163,7 @@
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
-           [(and (?seq? v1) (?seq? v2))
+           [(and (..? v1) (..? v2))
             (let loop ([seq1 v1] [seq2 v2])
               (cond
                 [(and (empty? seq1) (empty? seq2)) (true)] ; equal length
@@ -174,64 +172,65 @@
                 [else (loop (tail seq1) (tail seq2))]))]
            [else
             (triggered (exception "?leq: wrong argument type"))])))]
-
-    [(head? expr)
-     (let ([e (fri (head-e expr) env)])
-       (cond
-         [(triggered? e) e]
-         [(empty? e) e]
-         [(..? e)
-          (let ([e1 (..-e1 e)])
-            (if (empty? e1)
-                (triggered (exception "head: empty sequence"))
-                (fri e1 env)))]
-         [else (triggered (exception "head: wrong argument type"))]))]
-    [(tail? expr)
-     (let ([e (fri (tail-e expr) env)])
-       (cond
-         [(triggered? e) e]
-         [(empty? e) (triggered (exception "tail: empty sequence"))]
-         [(..? e) (let ([e2 (..-e2 e)])
-                    (if (empty? e2)
-                        e2
-                        (fri e2 env)))]
-         [else (triggered (exception "tail: wrong argument type"))]))]
-    [(~? expr)
-     (let ([v (fri (~-e expr) env)])
-       (cond
-         [(int? v) (int (- (int-e v)))]
-         [(true? v) (int 1)]
-         [(false? v) (int 0)]
-         [else (triggered (exception "~: wrong argument type"))]))]
-    [(?all? expr)
-     (let ([v (fri (?all-e expr) env)])
-       (cond
-         [(triggered? v) v]
-         [(?seq? v)
-          (if (false? (..-e1 v)) (false) (fri (?all (..-e2 v)) env))]
-         [(empty? v) (true)]
-         [else (triggered (exception "?all: wrong argument type"))]))]
-    [(?any? expr)
-     (let ([v (fri (?any-e expr) env)])
-       (cond
-         [(?seq? v)
-          (if (true? (..-e1 v)) (true) (fri (?all (..-e2 v)) env))]
-         [(empty? v) (false)]
-         [else (triggered (exception "?any: wrong argument type"))]))]
     [(?=? expr)
      (let ([e1 (?=-e1 expr)]
            [e2 (?=-e2 expr)])
        (let ([v1 (fri e1 env)]
              [v2 (fri e2 env)])
          (cond
+           [(triggered? v1) v1]
+           [(triggered? v2) v2]
+           [(and (empty? v1) (empty? v2)) (true)]
            [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
-           [(and (int? v1) (int? v2) (not (= (int-e v1) (int-e v2)))) (false)]
-           [(and (?seq? v1) (?seq? v2))
-            (if (fri (?= (..-e1 v1) (..-e1 v2)) env)
-                (fri (?= (..-e2 v1) (..-e2 v2)) env)
-                (false))]
-           [else (true)])))]
-
+           [(and (int? v1) (int? v2)) (if (eq? (int-e v1) (int-e v2)) (true) (false))]
+           [(and (..? v1) (..? v2))
+            (and (fri (?= (..-e1 v1) (..-e1 v2)) env)
+                 (fri (?= (..-e2 v1) (..-e2 v2)) env))]
+           [else (false)])))]
+    [(head? expr)
+     (let ([e (fri (head-e expr) env)])
+       (cond
+         [(triggered? e) e]
+         [(empty? e) (triggered (exception "head: empty sequence"))]
+         [(..? e) (..-e1 e)]
+         [else (triggered (exception "head: wrong argument type"))]))]
+    [(tail? expr)
+     (let ([e (fri (tail-e expr) env)])
+       (cond
+         [(triggered? e) e]
+         [(empty? e) (triggered (exception "tail: empty sequence"))]
+         [(..? e) (..-e2 e)]
+         [else (triggered (exception "tail: wrong argument type"))]))]
+    [(~? expr)
+     (let ([v (fri (~-e expr) env)])
+       (cond
+         [(triggered? v) v]
+         [(int? v) (int (- (int-e v)))]
+         [(true? v) (false)]
+         [(false? v) (true)]
+         [else (triggered (exception "~: wrong argument type"))]))]
+    [(?all? expr)
+     (let ([v (fri (?all-e expr) env)])
+       (cond
+         [(triggered? v) v]
+         [(true? (fri (?seq v) env))
+          (cond
+            [(empty? v) (true)]
+            [(false? (..-e1 v)) (false)]
+            [else (fri (?all (..-e2 v)) env)]
+            )]
+         [else (triggered (exception "?all: wrong argument type"))]))]
+    [(?any? expr)
+     (let ([v (fri (?any-e expr) env)])
+       (cond
+         [(triggered? v) v]
+         [(true? (fri (?seq v) env))
+          (cond
+            [(empty? v) (false)]
+            [(true? (..-e1 v)) (true)]
+            [else (fri (?all (..-e2 v)) env)]
+            )]
+         [else (triggered (exception "?any: wrong argument type"))]))]
     [(vars? expr)
      (let ([s (vars-s expr)]
            [e1 (vars-e1 expr)]
@@ -240,21 +239,19 @@
            (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
              (fri e2 (append new-vars env)))
            (fri e2 (cons (cons s (fri e1 env)) env))))]
-
     [(valof? expr)
      (let ([s (valof-s expr)])
        (let ([v (lookup s env)])
          (if (triggered? v)
              v
              (cond
-               [(closure? v) v]  ; return closure as is
-               [(fun? v) v]      ; return fun as is
+               ; return funs as is
+               [(closure? v) v]
+               [(fun? v) v]
+               [(proc? v) v]
                [else (fri v env)]))))]
-
     [(proc? expr) (closure env expr)]
-
     [(fun? expr) (closure env expr)]
-
     [(call? expr)
      (let ([e (fri (call-e expr) env)]
            [args (map (lambda (val) (fri val env)) (call-args expr))])
@@ -279,7 +276,6 @@
                [else
                 (triggered (exception "call: wrong argument type"))]))
            (triggered (exception "call: wrong argument type"))))]
-
     [else (error "Expression not found")]))
 
 (define (lookup var env)
