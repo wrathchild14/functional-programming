@@ -237,7 +237,9 @@
            [e2 (vars-e2 expr)])
        (if (and (list? s) (list? e1))
            (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
-             (fri e2 (append new-vars env)))
+             (if (equal? (length new-vars) (length (remove-duplicates (map car new-vars)))) ; names
+                 (fri e2 (append new-vars env))
+                 (triggered (exception "vars: duplicate identifier"))))
            (fri e2 (cons (cons s (fri e1 env)) env))))]
     [(valof? expr)
      (let ([s (valof-s expr)])
