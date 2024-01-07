@@ -278,8 +278,9 @@
                [(proc? fun)
                 (let ([name (proc-name fun)]
                       [body (proc-body fun)])
-                  (let ([new-env (cons (cons name e) env)])
-                    (fri body new-env)))]
+                  (if (= (length args) 0)
+                      (fri body (cons (cons name e) env))
+                      (triggered (exception "call: arity mismatch"))))]
                [else
                 (triggered (exception "call: wrong argument type"))]))
            (triggered (exception "call: wrong argument type"))))]
