@@ -116,10 +116,11 @@
                    v2
                    (if (eq? (exception-exn v1) (exception-exn (triggered-exn v2))) v3 v2)))))]
     [(if-then-else? expr)
-     (let ([cond (if-then-else-cond expr)] [e1 (if-then-else-e1 expr)] [e2 (if-then-else-e2 expr)])
-       (match (fri cond env)
-         [#f (fri e2 env)]
-         [_ (fri e1 env)]))]
+     (let ([v-cond (fri (if-then-else-cond expr) env)])
+       (cond
+         [(triggered? v-cond) v-cond]
+         [(false? v-cond) (fri (if-then-else-e2 expr) env)]
+         [else (fri (if-then-else-e1 expr) env)]))]
     [(?int? expr)
      (let ([n (fri (?int-e expr) env)]) (if (triggered? n) n (if (int? n) (true) (false))))]
     [(?bool? expr)
@@ -182,8 +183,8 @@
            [(and (false? v1) (true? v2)) (true)]
            [(and (true? v1) (false? v2)) (false)]
            [(and (true? v1) (true? v2)) (true)]
-           ; [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
-           [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))] ; ??
+           [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
+           ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))] ; ??
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
