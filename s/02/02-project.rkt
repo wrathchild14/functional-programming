@@ -54,21 +54,21 @@
     [(false? expr) expr]
     [(int? expr) expr]
     [(..? expr)
-     (let ([e1 (..-e1 expr)] [e2 (..-e2 expr)])
+     (let ([e1 (..-e1 expr)]
+           [e2 (..-e2 expr)])
        (let ([v1 (fri e1 env)])
          (let ([v2 (fri e2 env)])
            (cond
              [(triggered? v1) v1]
              [(triggered? v2) v2]
              [else (.. v1 v2)]))))]
-    [(empty? expr) expr]
+    [(empty? expr) (empty)]
     [(exception? expr) expr]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
-       (cond
-         [(triggered? v) v]
-         [(exception? v) (triggered v)]
-         [else (triggered (exception "trigger: wrong argument type"))]))]
+       (cond [(triggered? v) v]
+             [(exception? v) (triggered v)]
+             [else (triggered (exception "trigger: wrong argument type"))]))]
     [(handle? expr)
      (let ([v1 (fri (handle-e1 expr) env)]
            [v2 (fri (handle-e2 expr) env)]
@@ -123,7 +123,9 @@
             (let loop ([lst v1])
               (if (empty? lst)
                   v2
-                  (let ([first (..-e1 lst)] [rest (..-e2 lst)]) (.. first (loop rest)))))]
+                  (let ([first (..-e1 lst)]
+                        [rest (..-e2 lst)])
+                    (.. first (loop rest)))))]
            [(and (empty? v1) (empty? v2)) v1]
            [(and (..? v1) (empty? v2)) v1]
            [(and (empty? v1) (..? v2)) v2]
@@ -269,7 +271,8 @@
                                     call))))
                         (triggered (exception "call: arity mismatch")))))]
                [(proc? fun)
-                (let ([name (proc-name fun)] [body (proc-body fun)])
+                (let ([name (proc-name fun)]
+                      [body (proc-body fun)])
                   (if (= (length args) 0)
                       (fri body (cons (cons name e) env))
                       (triggered (exception "call: arity mismatch"))))]
@@ -283,32 +286,14 @@
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
-; (define (greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true)))
+(define (greater e1 e2)
+  '())
 
-; (define (rev e)
-;      (letrec ([reverse (lambda (seq)
-;                          (cond
-;                            [(empty? seq) (empty)]
-;                            [(..? seq) (add (reverse (..-e2 seq)) (.. (..-e1 seq) (empty)))]
-;                            [else (triggered (exception "rev: wrong argument type"))]))])
-;        (reverse (fri e null))))
+(define (rev e)
+  '())
 
-; (define (binary e1)
-;      (let ([value (fri e1 null)])
-;        (cond
-;          [(int? value) (rev (to-binary (int-e value)))]
-;          [else (triggered (exception "binary: wrong argument type"))])))
-
-; (define (to-binary n)
-;   (cond
-;     [(zero? n) (empty)]
-;     [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
-
-(define (greater e1 e2) '())
-
-(define (rev e) '())
-
-(define (binary e) '())
+(define (binary e1)
+  '())
 
 (define (mapping f seq)
   '())
