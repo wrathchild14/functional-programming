@@ -306,32 +306,28 @@
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
-(define-syntax greater
-  (syntax-rules ()
-    [(greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true))]))
+(define (greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true)))
 
-(define-syntax rev
-  (syntax-rules ()
-    [(rev e)
+(define (rev e)
      (letrec ([reverse (lambda (seq)
                          (cond
                            [(empty? seq) (empty)]
                            [(..? seq) (add (reverse (..-e2 seq)) (.. (..-e1 seq) (empty)))]
                            [else (triggered (exception "rev: wrong argument type"))]))])
-       (reverse (fri e null)))]))
+       (reverse (fri e null))))
 
-(define-syntax binary
-  (syntax-rules ()
-    [(binary e1)
-     (let ([value (fri e1 null)])
-       (cond
-         [(int? value) (rev (to-binary (int-e value)))]
-         [else (triggered (exception "binary: wrong argument type"))]))]))
+; (define (binary e1)
+;      (let ([value (fri e1 null)])
+;        (cond
+;          [(int? value) (rev (to-binary (int-e value)))]
+;          [else (triggered (exception "binary: wrong argument type"))])))
 
-(define (to-binary n)
-  (cond
-    [(zero? n) (empty)]
-    [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
+; (define (to-binary n)
+;   (cond
+;     [(zero? n) (empty)]
+;     [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
+
+(define (binary e) '())
 
 (define (mapping f seq)
   '())
