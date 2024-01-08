@@ -160,7 +160,7 @@
            [(and (true? v1) (false? v2)) (false)]
            [(and (true? v1) (true? v2)) (true)]
            [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
-          ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
+           ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
@@ -300,11 +300,28 @@
          (false)
          (true))]))
 
-(define (rev e)
-  '())
+(define-syntax rev
+  (syntax-rules ()
+    [(rev e)
+     (letrec ([reverse (lambda (seq)
+                         (cond
+                           [(empty? seq) (empty)]
+                           [(..? seq) (add (reverse (..-e2 seq)) (.. (..-e1 seq) (empty)))]
+                           [else (triggered (exception "rev: wrong argument type"))]))])
+       (reverse (fri e null)))]))
 
-(define (binary e1)
-  '())
+(define-syntax binary
+  (syntax-rules ()
+    [(binary e1)
+     (let ([value (fri e1 null)])
+       (cond
+         [(int? value) (rev (to-binary (int-e value)))]
+         [else (triggered (exception "binary: wrong argument type"))]))]))
+
+(define (to-binary n)
+  (cond
+    [(zero? n) (empty)]
+    [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
 
 (define (mapping f seq)
   '())
