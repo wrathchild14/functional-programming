@@ -1,12 +1,42 @@
 #lang racket
 
-(provide false true int .. empty exception
-         trigger triggered handle
+(provide false
+         true
+         int
+         ..
+         empty
+         exception
+         trigger
+         triggered
+         handle
          if-then-else
-         ?int ?bool ?.. ?seq ?empty ?exception
-         add mul ?leq ?= head tail ~ ?all ?any
-         vars valof fun proc closure call
-         greater rev binary filtering folding mapping
+         ?int
+         ?bool
+         ?..
+         ?seq
+         ?empty
+         ?exception
+         add
+         mul
+         ?leq
+         ?=
+         head
+         tail
+         ~
+         ?all
+         ?any
+         vars
+         valof
+         fun
+         proc
+         closure
+         call
+         greater
+         rev
+         binary
+         filtering
+         folding
+         mapping
          fri)
 
 (struct true () #:transparent)
@@ -20,7 +50,11 @@
 (struct trigger (exn) #:transparent)
 (struct triggered (exn) #:transparent)
 (struct handle (e1 e2 e3) #:transparent)
-(struct if-then-else (cond e1 e2) #:transparent)
+(struct if-then-else
+        (cond
+          e1
+          e2)
+  #:transparent)
 
 (struct ?int (e) #:transparent)
 (struct ?bool (e) #:transparent)
@@ -54,8 +88,7 @@
     [(false? expr) (false)]
     [(int? expr) (if (integer? (int-e expr)) expr (triggered (exception "int: wrong type")))]
     [(..? expr)
-     (let ([e1 (..-e1 expr)]
-           [e2 (..-e2 expr)])
+     (let ([e1 (..-e1 expr)] [e2 (..-e2 expr)])
        (let ([v1 (fri e1 env)])
          (let ([v2 (fri e2 env)])
            (cond
@@ -63,29 +96,32 @@
              [(triggered? v2) v2]
              [else (.. v1 v2)]))))]
     [(empty? expr) (empty)]
-    [(exception? expr) (if (string? (exception-exn expr)) expr (triggered (exception "exception: wrong type")))]
+    [(exception? expr)
+     (if (string? (exception-exn expr)) expr (triggered (exception "exception: wrong type")))]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
-       (cond [(triggered? v) v]
-             [(exception? v) (triggered v)]
-             [else (triggered (exception "trigger: wrong argument type"))]))]
+       (cond
+         [(triggered? v) v]
+         [(exception? v) (triggered v)]
+         [else (triggered (exception "trigger: wrong argument type"))]))]
     [(handle? expr)
      (let ([v1 (fri (handle-e1 expr) env)]
            [v2 (fri (handle-e2 expr) env)]
            [v3 (fri (handle-e3 expr) env)])
-       (if (triggered? v1) v1 (if (not (exception? v1)) (triggered (exception "handle: wrong argument type"))
-                                  (if (not (triggered? v2)) v2
-                                      (if (eq? (exception-exn v1) (exception-exn (triggered-exn v2))) v3 v2)))))]
+       (if (triggered? v1)
+           v1
+           (if (not (exception? v1))
+               (triggered (exception "handle: wrong argument type"))
+               (if (not (triggered? v2))
+                   v2
+                   (if (eq? (exception-exn v1) (exception-exn (triggered-exn v2))) v3 v2)))))]
     [(if-then-else? expr)
-     (let ([cond (if-then-else-cond expr)]
-           [e1 (if-then-else-e1 expr)]
-           [e2 (if-then-else-e2 expr)])
+     (let ([cond (if-then-else-cond expr)] [e1 (if-then-else-e1 expr)] [e2 (if-then-else-e2 expr)])
        (match (fri cond env)
          [#f (fri e2 env)]
          [_ (fri e1 env)]))]
     [(?int? expr)
-     (let ([n (fri (?int-e expr) env)])
-       (if (triggered? n) n (if (int? n) (true) (false))))]
+     (let ([n (fri (?int-e expr) env)]) (if (triggered? n) n (if (int? n) (true) (false))))]
     [(?bool? expr)
      (let ([b (fri (?bool-e expr) env)])
        (if (triggered? b) b (if (or (true? b) (false? b)) (true) (false))))]
@@ -100,23 +136,16 @@
        (cond
          [(triggered? s) s]
          [(empty? s) (true)]
-         [(..? s)
-          (let ([v2 (..-e2 s)])
-            (if (empty? v2)
-                (true)
-                (fri (?seq v2) env)))]
+         [(..? s) (let ([v2 (..-e2 s)]) (if (empty? v2) (true) (fri (?seq v2) env)))]
          [else (false)]))]
     [(?empty? expr)
-     (let ([v (fri (?empty-e expr) env)])
-       (if (triggered? v) v (if (empty? v) (true) (false))))]
+     (let ([v (fri (?empty-e expr) env)]) (if (triggered? v) v (if (empty? v) (true) (false))))]
     [(?exception? expr)
      (let ([ex (fri (?exception-e expr) env)])
        (if (triggered? ex) ex (if (exception? ex) (true) (false))))]
     [(add? expr)
-     (let ([e1 (add-e1 expr)]
-           [e2 (add-e2 expr)])
-       (let ([v1 (fri e1 env)]
-             [v2 (fri e2 env)])
+     (let ([e1 (add-e1 expr)] [e2 (add-e2 expr)])
+       (let ([v1 (fri e1 env)] [v2 (fri e2 env)])
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
@@ -128,18 +157,14 @@
             (let loop ([lst v1])
               (if (empty? lst)
                   v2
-                  (let ([first (..-e1 lst)]
-                        [rest (..-e2 lst)])
-                    (.. first (loop rest)))))]
+                  (let ([first (..-e1 lst)] [rest (..-e2 lst)]) (.. first (loop rest)))))]
            [(and (empty? v1) (empty? v2)) v1]
            [(and (..? v1) (empty? v2)) v1]
            [(and (empty? v1) (..? v2)) v2]
            [else (triggered (exception "add: wrong argument type"))])))]
     [(mul? expr)
-     (let ([e1 (mul-e1 expr)]
-           [e2 (mul-e2 expr)])
-       (let ([v1 (fri e1 env)]
-             [v2 (fri e2 env)])
+     (let ([e1 (mul-e1 expr)] [e2 (mul-e2 expr)])
+       (let ([v1 (fri e1 env)] [v2 (fri e2 env)])
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
@@ -148,10 +173,8 @@
            [(and (int? v1) (int? v2)) (int (* (int-e v1) (int-e v2)))]
            [else (triggered (exception "mul: wrong argument type"))])))]
     [(?leq? expr)
-     (let ([e1 (?leq-e1 expr)]
-           [e2 (?leq-e2 expr)])
-       (let ([v1 (fri e1 env)]
-             [v2 (fri e2 env)])
+     (let ([e1 (?leq-e1 expr)] [e2 (?leq-e2 expr)])
+       (let ([v1 (fri e1 env)] [v2 (fri e2 env)])
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
@@ -159,8 +182,8 @@
            [(and (false? v1) (true? v2)) (true)]
            [(and (true? v1) (false? v2)) (false)]
            [(and (true? v1) (true? v2)) (true)]
-           [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
-           ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))]
+           ; [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
+           [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))] ; ??
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
@@ -171,13 +194,10 @@
                 [(empty? seq1) (true)] ; seq1 shorter than seq2
                 [(empty? seq2) (false)] ; seq2 shorter than seq1
                 [else (loop (tail seq1) (tail seq2))]))]
-           [else
-            (triggered (exception "?leq: wrong argument type"))])))]
+           [else (triggered (exception "?leq: wrong argument type"))])))]
     [(?=? expr)
-     (let ([e1 (?=-e1 expr)]
-           [e2 (?=-e2 expr)])
-       (let ([v1 (fri e1 env)]
-             [v2 (fri e2 env)])
+     (let ([e1 (?=-e1 expr)] [e2 (?=-e2 expr)])
+       (let ([v1 (fri e1 env)] [v2 (fri e2 env)])
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
@@ -185,8 +205,7 @@
            [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
            [(and (int? v1) (int? v2)) (if (eq? (int-e v1) (int-e v2)) (true) (false))]
            [(and (..? v1) (..? v2))
-            (and (fri (?= (..-e1 v1) (..-e1 v2)) env)
-                 (fri (?= (..-e2 v1) (..-e2 v2)) env))]
+            (and (fri (?= (..-e1 v1) (..-e1 v2)) env) (fri (?= (..-e2 v1) (..-e2 v2)) env))]
            [else (false)])))]
     [(head? expr)
      (let ([e (fri (head-e expr) env)])
@@ -218,8 +237,7 @@
           (cond
             [(empty? v) (true)]
             [(false? (..-e1 v)) (false)]
-            [else (fri (?all (..-e2 v)) env)]
-            )]
+            [else (fri (?all (..-e2 v)) env)])]
          [else (triggered (exception "?all: wrong argument type"))]))]
     [(?any? expr)
      (let ([v (fri (?any-e expr) env)])
@@ -229,13 +247,10 @@
           (cond
             [(empty? v) (false)]
             [(true? (..-e1 v)) (true)]
-            [else (fri (?all (..-e2 v)) env)]
-            )]
+            [else (fri (?all (..-e2 v)) env)])]
          [else (triggered (exception "?any: wrong argument type"))]))]
     [(vars? expr)
-     (let ([s (vars-s expr)]
-           [e1 (vars-e1 expr)]
-           [e2 (vars-e2 expr)])
+     (let ([s (vars-s expr)] [e1 (vars-e1 expr)] [e2 (vars-e2 expr)])
        (if (and (list? s) (list? e1))
            (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
              (if (equal? (length new-vars) (length (remove-duplicates (map car new-vars)))) ; names
@@ -261,29 +276,26 @@
              (triggered (exception "fun: duplicate argument identifier"))
              (closure env expr))))]
     [(call? expr)
-     (let ([e (fri (call-e expr) env)]
-           [args (map (lambda (val) (fri val env)) (call-args expr))])
+     (let ([e (fri (call-e expr) env)] [args (map (lambda (val) (fri val env)) (call-args expr))])
        (if (closure? e)
-           (let ([fun (closure-f e)]
-                 [fun-env (closure-env e)])
+           (let ([fun (closure-f e)] [fun-env (closure-env e)])
              (cond
                [(fun? fun)
-                (let ([name (fun-name fun)]
-                      [arg-names (fun-fargs fun)]
-                      [body (fun-body fun)])
+                (let ([name (fun-name fun)] [arg-names (fun-fargs fun)] [body (fun-body fun)])
                   (let ([arg-values (map (lambda (arg) (fri arg env)) args)])
                     (if (= (length arg-names) (length arg-values))
-                        (let ([new-env (append (list (cons name e)) (append (map (lambda (i j) (cons i j)) arg-names arg-values) fun-env))])
+                        (let ([new-env
+                               (append (list (cons name e))
+                                       (append (map (lambda (i j) (cons i j)) arg-names arg-values)
+                                               fun-env))])
                           (fri body new-env))
                         (triggered (exception "call: arity mismatch")))))]
                [(proc? fun)
-                (let ([name (proc-name fun)]
-                      [body (proc-body fun)])
+                (let ([name (proc-name fun)] [body (proc-body fun)])
                   (if (= (length args) 0)
                       (fri body (cons (cons name e) env))
                       (triggered (exception "call: arity mismatch"))))]
-               [else
-                (triggered (exception "call: wrong argument type"))]))
+               [else (triggered (exception "call: wrong argument type"))]))
            (triggered (exception "call: wrong argument type"))))]
     [else (error "Expression not found")]))
 
@@ -295,10 +307,7 @@
 
 (define-syntax greater
   (syntax-rules ()
-    [(greater e1 e2)
-     (if (true? (fri (?leq e1 e2) null))
-         (false)
-         (true))]))
+    [(greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true))]))
 
 (define-syntax rev
   (syntax-rules ()
