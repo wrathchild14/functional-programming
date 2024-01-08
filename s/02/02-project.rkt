@@ -1,42 +1,12 @@
 #lang racket
 
-(provide false
-         true
-         int
-         ..
-         empty
-         exception
-         trigger
-         triggered
-         handle
+(provide false true int .. empty exception
+         trigger triggered handle
          if-then-else
-         ?int
-         ?bool
-         ?..
-         ?seq
-         ?empty
-         ?exception
-         add
-         mul
-         ?leq
-         ?=
-         head
-         tail
-         ~
-         ?all
-         ?any
-         vars
-         valof
-         fun
-         proc
-         closure
-         call
-         greater
-         rev
-         binary
-         filtering
-         folding
-         mapping
+         ?int ?bool ?.. ?seq ?empty ?exception
+         add mul ?leq ?= head tail ~ ?all ?any
+         vars valof fun proc closure call
+         greater rev binary filtering folding mapping
          fri)
 
 (struct true () #:transparent)
@@ -50,11 +20,7 @@
 (struct trigger (exn) #:transparent)
 (struct triggered (exn) #:transparent)
 (struct handle (e1 e2 e3) #:transparent)
-(struct if-then-else
-        (cond
-          e1
-          e2)
-  #:transparent)
+(struct if-then-else (cond e1 e2) #:transparent)
 
 (struct ?int (e) #:transparent)
 (struct ?bool (e) #:transparent)
@@ -84,9 +50,9 @@
 
 (define (fri expr env)
   (cond
-    [(true? expr) (true)]
-    [(false? expr) (false)]
-    [(int? expr) (if (integer? (int-e expr)) expr (triggered (exception "int: wrong type")))]
+    [(true? expr) expr]
+    [(false? expr) expr]
+    [(int? expr) expr]
     [(..? expr)
      (let ([e1 (..-e1 expr)] [e2 (..-e2 expr)])
        (let ([v1 (fri e1 env)])
@@ -95,9 +61,8 @@
              [(triggered? v1) v1]
              [(triggered? v2) v2]
              [else (.. v1 v2)]))))]
-    [(empty? expr) (empty)]
-    [(exception? expr)
-     (if (string? (exception-exn expr)) expr (triggered (exception "exception: wrong type")))]
+    [(empty? expr) expr]
+    [(exception? expr) expr]
     [(trigger? expr)
      (let ([v (fri (trigger-exn expr) env)])
        (cond
@@ -289,7 +254,12 @@
                                (append (list (cons name e))
                                        (append (map (lambda (i j) (cons i j)) arg-names arg-values)
                                                fun-env))])
-                          (fri body new-env))
+                          (let ([call (fri body new-env)])
+                            (if (triggered? call)
+                                (if (equal? (exception "valof: undefined variable") (triggered-exn call))
+                                    (triggered (exception "closure: undefined variable"))
+                                    call)
+                                call)))
                         (triggered (exception "call: arity mismatch")))))]
                [(proc? fun)
                 (let ([name (proc-name fun)] [body (proc-body fun)])
@@ -306,15 +276,15 @@
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
-(define (greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true)))
+; (define (greater e1 e2) (if (true? (fri (?leq e1 e2) null)) (false) (true)))
 
-(define (rev e)
-     (letrec ([reverse (lambda (seq)
-                         (cond
-                           [(empty? seq) (empty)]
-                           [(..? seq) (add (reverse (..-e2 seq)) (.. (..-e1 seq) (empty)))]
-                           [else (triggered (exception "rev: wrong argument type"))]))])
-       (reverse (fri e null))))
+; (define (rev e)
+;      (letrec ([reverse (lambda (seq)
+;                          (cond
+;                            [(empty? seq) (empty)]
+;                            [(..? seq) (add (reverse (..-e2 seq)) (.. (..-e1 seq) (empty)))]
+;                            [else (triggered (exception "rev: wrong argument type"))]))])
+;        (reverse (fri e null))))
 
 ; (define (binary e1)
 ;      (let ([value (fri e1 null)])
@@ -326,6 +296,10 @@
 ;   (cond
 ;     [(zero? n) (empty)]
 ;     [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
+
+(define (rev e) '())
+
+(define (greater e1 e2) '())
 
 (define (binary e) '())
 
