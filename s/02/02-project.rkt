@@ -81,10 +81,10 @@
                    v2
                    (if (eq? (exception-exn v1) (exception-exn (triggered-exn v2))) v3 v2)))))]
     [(if-then-else? expr)
-     (let ([v-cond (fri (if-then-else-cond expr) env)])
+     (let ([cond-value (fri (if-then-else-cond expr) env)])
        (cond
-         [(triggered? v-cond) v-cond]
-         [(false? v-cond) (fri (if-then-else-e2 expr) env)]
+         [(triggered? cond-value) cond-value]
+         [(false? cond-value) (fri (if-then-else-e2 expr) env)]
          [else (fri (if-then-else-e1 expr) env)]))]
     [(?int? expr)
      (let ([n (fri (?int-e expr) env)]) (if (triggered? n) n (if (int? n) (true) (false))))]
