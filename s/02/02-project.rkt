@@ -218,6 +218,7 @@
     [(vars? expr)
      (let ([s (vars-s expr)] [e1 (vars-e1 expr)] [e2 (vars-e2 expr)])
        (if (and (list? s) (list? e1))
+           ; map new variables and check for duplicate ids
            (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
              (if (equal? (length new-vars) (length (remove-duplicates (map car new-vars)))) ; names
                  (fri e2 (append new-vars env))
@@ -236,26 +237,28 @@
                [else (fri v env)]))))]
     [(proc? expr) (closure env expr)]
     [(fun? expr)
+     ; check fun definition (unique argument ids)
      (let ([fargs (fun-fargs expr)])
        (let ([unique-args-bool (equal? (length fargs) (length (remove-duplicates fargs)))])
          (if (not unique-args-bool)
              (triggered (exception "fun: duplicate argument identifier"))
              (closure env expr))))]
     [(call? expr)
-     (let ([e (fri (call-e expr) env)] [args (map (lambda (val) (fri val env)) (call-args expr))])
+     (let ([e (fri (call-e expr) env)]
+           [args (map (lambda (val) (fri val env)) (call-args expr))]) ; eval passed args
        (if (closure? e)
            (let ([fun (closure-f e)] [fun-env (closure-env e)])
              (cond
                [(fun? fun)
                 (let ([name (fun-name fun)] [arg-names (fun-fargs fun)] [body (fun-body fun)])
-                  (let ([arg-values (map (lambda (arg) (fri arg env)) args)])
-                    (if (= (length arg-names) (length arg-values))
+                  (let ([arg-values (map (lambda (arg) (fri arg env)) args)]) ; eval arg values
+                    (if (= (length arg-names) (length arg-values)) ; match arg count with fun def
                         (let ([new-env
                                (append (list (cons name e))
                                        (append (map (lambda (i j) (cons i j)) arg-names arg-values)
                                                fun-env))])
                           (let ([call (fri body new-env)])
-                            (if (triggered? call)
+                            (if (triggered? call) ; handle undefined vars in closure
                                 (if (equal? (exception "valof: undefined variable") (triggered-exn call))
                                     (triggered (exception "closure: undefined variable"))
                                     call)
@@ -266,8 +269,8 @@
                   (if (= (length args) 0)
                       (fri body (cons (cons name e) env))
                       (triggered (exception "call: arity mismatch"))))]
-               [else (triggered (exception "call: wrong argument type"))]))
-           (triggered (exception "call: wrong argument type"))))]
+               [else (triggered (exception "call: wrong argument type"))])) ; non fun/proc types
+           (triggered (exception "call: wrong argument type"))))] ; non closure types
     [else (error "Expression not found")]))
 
 (define (lookup var env)
