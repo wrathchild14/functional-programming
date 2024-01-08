@@ -156,12 +156,11 @@
            [(empty? v2) (false)]
            [(empty? v1) (true)]
            [(and (..? v1) (..? v2))
-            (let loop ([seq1 v1] [seq2 v2])
-              (cond
-                [(and (empty? seq1) (empty? seq2)) (true)] ; equal length
-                [(empty? seq1) (true)] ; seq1 shorter than seq2
-                [(empty? seq2) (false)] ; seq2 shorter than seq1
-                [else (loop (tail seq1) (tail seq2))]))]
+            (cond
+              [(and (empty? v1) (not (empty? v2))) (true)]
+              [(and (not (empty? v1)) (empty? v2)) (false)]
+              [(and (empty? v1) (empty? v2)) (true)]
+              [else (fri (?leq (..-e2 v1) (..-e2 v2)))])]
            [else (triggered (exception "?leq: wrong argument type"))])))]
     [(?=? expr)
      (let ([e1 (?=-e1 expr)] [e2 (?=-e2 expr)])
@@ -173,7 +172,10 @@
            [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
            [(and (int? v1) (int? v2)) (if (eq? (int-e v1) (int-e v2)) (true) (false))]
            [(and (..? v1) (..? v2))
-            (and (fri (?= (..-e1 v1) (..-e1 v2)) env) (fri (?= (..-e2 v1) (..-e2 v2)) env))]
+            (cond
+              [(true? (fri (?= (..-e1 v1) (..-e1 v2)) env)) (fri (?= (..-e2 v1) (..-e2 v2)) env)]
+              [else (false)]
+              )]
            [else (false)])))]
     [(head? expr)
      (let ([e (fri (head-e expr) env)])
@@ -248,36 +250,41 @@
     [(call? expr)
      (let ([e (fri (call-e expr) env)]
            [args (map (lambda (val) (fri val env)) (call-args expr))]) ; eval passed args
-       (if (closure? e)
-           (let ([fun (closure-f e)] [fun-env (closure-env e)])
-             (cond
-               [(triggered? fun) fun]
-               [(fun? fun)
-                (let ([name (fun-name fun)]
-                      [arg-names (fun-fargs fun)]
-                      [body (fun-body fun)])
-                  (let ([arg-values (map (lambda (arg) (fri arg env)) args)]) ; eval arg values
-                    (if (= (length arg-names) (length arg-values)) ; match arg count with fun def
-                        (let ([new-env
-                               (append (list (cons name e))
-                                       (append (map (lambda (i j) (cons i j)) arg-names arg-values)
-                                               fun-env))])
-                          (if (triggered? new-env) new-env
-                              (let ([call (fri body new-env)])
-                                (if (triggered? call) ; handle undefined vars in closure
-                                    (if (equal? (exception "valof: undefined variable") (triggered-exn call))
-                                        (triggered (exception "closure: undefined variable"))
-                                        call)
-                                    call))))
-                        (triggered (exception "call: arity mismatch")))))]
-               [(proc? fun)
-                (let ([name (proc-name fun)]
-                      [body (proc-body fun)])
-                  (if (= (length args) 0)
-                      (fri body (cons (cons name e) env))
-                      (triggered (exception "call: arity mismatch"))))]
-               [else (triggered (exception "call: wrong argument type"))])) ; non fun/proc types
-           (triggered (exception "call: wrong argument type"))))] ; non closure types
+       (cond [(triggered? e) e]
+             [(triggered? args) args]
+             [(closure? e)
+              (let ([fun (closure-f e)] [fun-env (closure-env e)])
+                (cond
+                  [(triggered? fun) fun]
+                  [(fun? fun)
+                   (let ([name (fun-name fun)]
+                         [arg-names (fun-fargs fun)]
+                         [body (fun-body fun)])
+                     (let ([arg-values (map (lambda (arg) (fri arg env)) args)]) ; eval arg values
+                       (if (= (length arg-names) (length arg-values)) ; match arg count with fun def
+                           (let ([new-env
+                                  (append (list (cons name e))
+                                          (append (map (lambda (i j) (cons i j)) arg-names arg-values)
+                                                  fun-env))])
+                             (if (triggered? new-env) new-env
+                                 (let ([call (fri body new-env)])
+                                   (if (triggered? call) ; handle undefined vars in closure
+                                       (if (equal? (exception "valof: undefined variable") (triggered-exn call))
+                                           (triggered (exception "closure: undefined variable"))
+                                           call)
+                                       call))))
+                           (triggered (exception "call: arity mismatch")))))]
+                  [(proc? fun)
+                   (let ([name (proc-name fun)]
+                         [body (proc-body fun)])
+                     (if (= (length args) 0)
+                         (fri body (cons (cons name e) env))
+                         (triggered (exception "call: arity mismatch"))))]
+                  [else (triggered (exception "call: wrong argument type"))])) ; non fun/proc types
+              ]
+             [else (triggered (exception "call: wrong argument type"))]
+             )
+       )] ; non closure types
     [else (error "Expression not found")]))
 
 (define (lookup var env)
