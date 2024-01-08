@@ -249,20 +249,24 @@
        (if (closure? e)
            (let ([fun (closure-f e)] [fun-env (closure-env e)])
              (cond
+               [(triggered? fun) fun]
                [(fun? fun)
-                (let ([name (fun-name fun)] [arg-names (fun-fargs fun)] [body (fun-body fun)])
+                (let ([name (fun-name fun)]
+                      [arg-names (fun-fargs fun)]
+                      [body (fun-body fun)])
                   (let ([arg-values (map (lambda (arg) (fri arg env)) args)]) ; eval arg values
                     (if (= (length arg-names) (length arg-values)) ; match arg count with fun def
                         (let ([new-env
                                (append (list (cons name e))
                                        (append (map (lambda (i j) (cons i j)) arg-names arg-values)
                                                fun-env))])
-                          (let ([call (fri body new-env)])
-                            (if (triggered? call) ; handle undefined vars in closure
-                                (if (equal? (exception "valof: undefined variable") (triggered-exn call))
-                                    (triggered (exception "closure: undefined variable"))
-                                    call)
-                                call)))
+                          (if (triggered? new-env) new-env
+                              (let ([call (fri body new-env)])
+                                (if (triggered? call) ; handle undefined vars in closure
+                                    (if (equal? (exception "valof: undefined variable") (triggered-exn call))
+                                        (triggered (exception "closure: undefined variable"))
+                                        call)
+                                    call))))
                         (triggered (exception "call: arity mismatch")))))]
                [(proc? fun)
                 (let ([name (proc-name fun)] [body (proc-body fun)])
@@ -300,9 +304,9 @@
 ;     [(zero? n) (empty)]
 ;     [#t (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
 
-(define (rev e) '())
-
 (define (greater e1 e2) '())
+
+(define (rev e) '())
 
 (define (binary e) '())
 
