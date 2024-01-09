@@ -223,14 +223,20 @@
             [else (fri (?all (..-e2 v)) env)])]
          [else (triggered (exception "?any: wrong argument type"))]))]
     [(vars? expr)
-     (let ([s (vars-s expr)] [e1 (vars-e1 expr)] [e2 (vars-e2 expr)])
+     (let ([s (vars-s expr)]
+           [e1 (vars-e1 expr)]
+           [e2 (vars-e2 expr)])
        (if (and (list? s) (list? e1))
            ; map new variables and check for duplicate ids
            (let ([new-vars (map (lambda (var val) (cons var (fri val env))) s e1)])
              (if (equal? (length new-vars) (length (remove-duplicates (map car new-vars)))) ; names
                  (fri e2 (append new-vars env))
                  (triggered (exception "vars: duplicate identifier"))))
-           (fri e2 (cons (cons s (fri e1 env)) env))))]
+           (let ([v1 (fri e1 env)])
+             (if (triggered? v1)
+                 v1
+                 (fri e2 (cons (cons s v1) env))))))]
+
     [(valof? expr)
      (let ([s (valof-s expr)])
        (let ([v (lookup s env)])
