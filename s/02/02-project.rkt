@@ -115,6 +115,7 @@
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
+           ; logical or
            [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
             (if (or (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (+ (int-e v1) (int-e v2)))]
@@ -136,6 +137,7 @@
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
+           ; logical and
            [(and (or (true? v1) (false? v1)) (or (true? v2) (false? v2)))
             (if (and (true? v1) (true? v2)) (true) (false))]
            [(and (int? v1) (int? v2)) (int (* (int-e v1) (int-e v2)))]
@@ -151,7 +153,6 @@
            [(and (false? v1) (true? v2)) (true)]
            [(and (true? v1) (false? v2)) (false)]
            [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
-           ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))] ; ??
            [(and (empty? v1) (empty? v2)) (true)]
            [(empty? v2) (false)]
            [(empty? v1) (true)]
@@ -273,6 +274,7 @@
                        (if (= (length arg-names) (length arg-values)) ; match arg count with fun def
                            (let ([new-env
                                   (append (list (cons name e))
+                                          ; name . value
                                           (append (map (lambda (i j) (cons i j)) arg-names arg-values)
                                                   fun-env))])
                              (if (triggered? new-env) new-env
@@ -280,7 +282,7 @@
                                    (if (triggered? call) ; handle undefined vars in closure
                                        (if (equal? (exception "valof: undefined variable") (triggered-exn call))
                                            (triggered (exception "closure: undefined variable"))
-                                           call)
+                                           call) ; trig exn
                                        call))))
                            (triggered (exception "call: arity mismatch")))))]
                   [(proc? fun)
@@ -296,11 +298,12 @@
        )] ; non closure types
     [else (error "Expression not found")]))
 
+; '((var1 . value1) (var2 . value2) ...)
 (define (lookup var env)
   (cond
     [(null? env) (triggered (exception "valof: undefined variable"))]
-    [(equal? (caar env) var) (cdar env)]
-    [else (lookup var (cdr env))]))
+    [(equal? (caar env) var) (cdar env)] ; var name matches entry in env, return val
+    [else (lookup var (cdr env))])) ; continue looking
 
 (define (greater e1 e2) (if (true? (fri (?= e1 e2) null)) (false) (?leq e2 e1)))
 
