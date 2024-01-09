@@ -236,7 +236,6 @@
              (if (triggered? v1)
                  v1
                  (fri e2 (cons (cons s v1) env))))))]
-
     [(valof? expr)
      (let ([s (valof-s expr)])
        (let ([v (lookup s env)])
@@ -325,28 +324,28 @@
     [else (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
 
 (define (mapping f seq)
-  (letrec ([map-h (lambda (seq)
+  (letrec ([map-h (lambda (arg)
                     (cond
-                      [(empty? seq) (empty)]
-                      [(..? seq) (.. (fri (call f (list (..-e1 seq))) null) (map-h (..-e2 seq)))]
+                      [(empty? arg) (empty)]
+                      [(..? arg) (.. (fri (call f (list (..-e1 arg))) null) (map-h (..-e2 arg)))]
                       [else (triggered (exception "mapping: wrong argument type"))]
                       ))])
     (map-h seq)))
 
 (define (filtering f seq)
-  (letrec ([filter-h (lambda (seq)
+  (letrec ([filter-h (lambda (arg)
                        (cond
-                         [(empty? seq) (empty)]
-                         [(true? (fri (call f (list (..-e1 seq))) null))
-                          (.. (..-e1 seq) (filter-h (..-e2 seq)))]
-                         [else (filter-h (..-e2 seq))]))])
+                         [(empty? arg) (empty)]
+                         [(true? (fri (call f (list (..-e1 arg))) null))
+                          (.. (..-e1 arg) (filter-h (..-e2 arg)))]
+                         [else (filter-h (..-e2 arg))]))])
     (filter-h seq)))
 
 (define (folding f init seq)
-  (letrec ([fold-h (lambda (seq acc)
+  (letrec ([fold-h (lambda (arg acc)
                      (cond
-                       [(empty? seq) acc]
-                       [(..? seq) (fold-h (..-e2 seq) (fri (call f (list (..-e1 seq) acc)) null))]
+                       [(empty? arg) acc]
+                       [(..? arg) (fold-h (..-e2 arg) (fri (call f (list (..-e1 arg) acc)) null))]
                        [else (triggered (exception "folding: wrong argument type"))]
                        ))])
     (fold-h seq init)))
