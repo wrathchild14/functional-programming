@@ -146,10 +146,10 @@
          (cond
            [(triggered? v1) v1]
            [(triggered? v2) v2]
+           [(and (true? v1) (true? v2)) (true)]
            [(and (false? v1) (false? v2)) (true)]
            [(and (false? v1) (true? v2)) (true)]
            [(and (true? v1) (false? v2)) (false)]
-           [(and (true? v1) (true? v2)) (true)]
            [(and (int? v1) (int? v2)) (if (<= (int-e v1) (int-e v2)) (true) (false))]
            ;  [(and (int? v1) (int? v2)) (<= (int-e v1) (int-e v2))] ; ??
            [(and (empty? v1) (empty? v2)) (true)]
@@ -169,7 +169,10 @@
            [(triggered? v1) v1]
            [(triggered? v2) v2]
            [(and (empty? v1) (empty? v2)) (true)]
-           [(or (and (true? v1) (false? v2)) (and (false? v1) (true? v2))) (false)]
+           [(and (false? v1) (false? v2)) (true)]
+           [(and (true? v1) (true? v2)) (true)]
+           [(and (true? v1) (false? v2)) (false)]
+           [(and (false? v1) (true? v2)) (false)]
            [(and (int? v1) (int? v2)) (if (eq? (int-e v1) (int-e v2)) (true) (false))]
            [(and (..? v1) (..? v2))
             (cond
@@ -238,7 +241,8 @@
                [(closure? v) v]
                [(fun? v) v]
                [(proc? v) v]
-               [else (fri v env)]))))]
+               [else (fri v env)])
+             )))]
     [(proc? expr) (closure env expr)]
     [(fun? expr)
      ; check fun definition (unique argument ids)
@@ -293,20 +297,50 @@
     [(equal? (caar env) var) (cdar env)]
     [else (lookup var (cdr env))]))
 
-(define (greater e1 e2)
-  '())
+(define (greater e1 e2) (if (true? (fri (?= e1 e2) null)) (false) (?leq e2 e1)))
 
 (define (rev e)
-  '())
+  (letrec ([rev-h (lambda (seq)
+                    (cond
+                      [(empty? seq) (empty)]
+                      [(..? seq) (add (rev-h (..-e2 seq)) (.. (..-e1 seq) (empty)))]
+                      [else (triggered (exception "rev: wrong argument type"))]))])
+    (rev-h (fri e null))))
 
 (define (binary e1)
-  '())
+  (let ([value (fri e1 null)])
+    (cond
+      [(and (int? value) (>= (int-e value) 0)) (rev (to-binary (int-e value)))]
+      [else (triggered (exception "binary: wrong argument type"))])))
+
+(define (to-binary n)
+  (cond
+    [(zero? n) (empty)]
+    [else (.. (int (remainder n 2)) (to-binary (quotient n 2)))]))
 
 (define (mapping f seq)
-  '())
+  (letrec ([map-h (lambda (seq)
+                    (cond
+                      [(empty? seq) (empty)]
+                      [(..? seq) (.. (fri (call f (list (..-e1 seq))) null) (map-h (..-e2 seq)))]
+                      [else (triggered (exception "mapping: wrong argument type"))]
+                      ))])
+    (map-h seq)))
 
 (define (filtering f seq)
-  '())
+  (letrec ([filter-h (lambda (seq)
+                       (cond
+                         [(empty? seq) (empty)]
+                         [(true? (fri (call f (list (..-e1 seq))) null))
+                          (.. (..-e1 seq) (filter-h (..-e2 seq)))]
+                         [else (filter-h (..-e2 seq))]))])
+    (filter-h seq)))
 
 (define (folding f init seq)
-  '())
+  (letrec ([fold-h (lambda (seq acc)
+                     (cond
+                       [(empty? seq) acc]
+                       [(..? seq) (fold-h (..-e2 seq) (fri (call f (list (..-e1 seq) acc)) null))]
+                       [else (triggered (exception "folding: wrong argument type"))]
+                       ))])
+    (fold-h seq init)))
