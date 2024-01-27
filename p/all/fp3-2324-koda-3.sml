@@ -604,12 +604,12 @@ fun mnozi pol konst =
     case pol of
 	Pol koef => if konst = 0
 		    then Nicla
-		    else Pol (map (fn (st,x) => (st,konst*x)) koef)
+		    else Pol (List.map (fn (st,x) => (st,konst*x)) koef)
       | Nicla => Nicla
 
 fun izpisi pol =
     case pol of
-	Pol koef => let val v_nize = (map (fn (st,x) => (if st=0 
+	Pol koef => let val v_nize = (List.map (fn (st,x) => (if st=0 
 							 then Int.toString(x) 
 							 else Int.toString(x) ^ "x^" ^ Int.toString(st))) koef)
 		    in foldl (fn (x,acc) => (acc ^ " + " ^ x))
