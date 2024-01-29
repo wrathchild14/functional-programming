@@ -29,6 +29,15 @@ fun obrni sez =
        [] => []
      | x::rep => (obrni rep) @ [x]
 
+fun my_obrni_repna sez = 
+    let 
+        fun helper sez = 
+            case sez of
+                [] => []
+              | x::rep => (obrni rep) @ [x]
+    in helper(sez)
+    end;
+
 fun obrni_repna sez =
     let 
 	fun pomozna(sez,acc) =
