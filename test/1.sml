@@ -169,3 +169,25 @@ and liho x =
 
 fun onlya s =
     String.implode (List.foldl (fn (x, acc) => if x = #"a" then x::acc else acc) [] (String.explode s));
+
+val a = 3
+val b = 7 (* 7 + 2 = 9 v lokalno okolje *)
+fun sestej3(c: int) =
+    let
+	    val a = 5
+    in
+	    a + (let val b=4 in b+1 end) + (let val c=b+2 in c end)
+        (* 5 + 5 + 9 (od zgoraj) = 19 (neodvisno od argumenta) *)
+    end
+val test1 = sestej3(2);
+val test2 = sestej3(3);
+
+fun skalarni [v1, v2] =
+    List.foldl (fn (x,y) => x+y) 0 (List.map(fn (e1,e2) => e1*e2) (ListPair.zip(v1,v2)))
+  | skalarni _ = raise Fail "napačni argumenti";
+
+fun nti (sez, n) = 
+    List.foldl (fn ((x, y), z) => y) ~1
+        (List.filter (fn (x, y) => x = n) (ListPair.zip 
+            (List.tabulate (List.length sez, fn x => x), sez)));
+
