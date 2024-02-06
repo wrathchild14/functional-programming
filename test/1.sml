@@ -129,3 +129,31 @@ fun insert(x, []) = [x]
 fun sort([]) = []
     | sort(x::xs) = insert(x, sort(xs));
 
+(* 1. Funkcijo, ki obrne elemente v seznamu *)
+fun reverse lst =
+    let
+        fun reverseHelper [] acc = acc
+        | reverseHelper (x::xs) acc = reverseHelper xs (x::acc)
+    in
+        reverseHelper lst []
+    end;
+
+(* 2. Funkcijo, ki prešteje število pozitivnih elementov v seznamu *)
+fun countPositive lst =
+    let
+        fun countHelper [] count = count
+        | countHelper (x::xs) count =
+            if x > 0 then countHelper xs (count + 1)
+            else countHelper xs count
+    in
+        countHelper lst 0
+    end;
+
+(* 3. Funkcijo, ki sešteje elemente v seznamu *)
+fun sum lst =
+    let
+        fun sumHelper [] acc = acc
+        | sumHelper (x::xs) acc = sumHelper xs (x + acc)
+    in
+        sumHelper lst 0
+    end;
