@@ -112,3 +112,20 @@ fun fun1 (x, y) [z] =
 
 val test_zapis = {1="Test", 2="Test2"};
 
+fun split lst = 
+    List.foldl (fn (x, (l, r)) => if length l <= length r then (l@[x], r) else (l, r@[x])) ([], []) lst;
+
+val test_split = split [1,2,3,4,5,6,7,8,9,10];
+val test_izpit_split = split [2,3,2,5,6,8,4,5];
+
+fun testna a {a=b, b=c} = 
+    List.map (fn x => a + (valOf b) - c(a));
+
+fun insert(x, []) = [x]
+    | insert(x, y::ys) =
+            if x <= y then x::y::ys
+            else y::insert(x, ys);
+
+fun sort([]) = []
+    | sort(x::xs) = insert(x, sort(xs));
+
