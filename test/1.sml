@@ -157,3 +157,15 @@ fun sum lst =
     in
         sumHelper lst 0
     end;
+
+fun sodo x =
+    if x=0
+    then true
+    else liho (x-1)
+and liho x =
+    if x=0
+    then false
+    else sodo (x-1);
+
+fun onlya s =
+    String.implode (List.foldl (fn (x, acc) => if x = #"a" then x::acc else acc) [] (String.explode s));
