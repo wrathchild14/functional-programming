@@ -79,3 +79,20 @@
 ; (define (rotate sez) (append (cdr sez) (list (car sez))))
 ; (define x (funkcijski rotate (list 1 3 5 7 9 11)))
 ; (izpisi 8 x)
+
+(define izpisi_primitave
+  (lambda sez
+    (displayln sez)))
+
+(define zmnozi
+  (lambda stevila
+    (apply * stevila)))
+
+
+; Primer na funcija ki ni sprejeta v trdnih sistemov:
+; To je LP primer fun, i guess zaradi if true then 0 del
+; f x = if true then 0 else 4 div "hello"
+(define (f x)
+  (if #t
+      0
+      (/ 4 "hello")))
