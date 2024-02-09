@@ -38,10 +38,18 @@ def f(a, b, c):
 #         else:
 #             raise StopIteration
 
+def Squares(max):
+    i = 0
+    while i<max:
+        yield i*i
+        i += 1
+
 if __name__ == "__main__":
-    for i, Zn in enumerate(Mandelbrot(0.2 + 0.7j, 10)):
-        print(f"Zap.št. {i} Rezultat {Zn} Abs. vrednost {abs(Zn)}")
-    print(f(1,2,3))
-    print(f(1)(2,3))
-    print(f(1,2)(3))
-    print(f(1)(2)(3))
+    # for i, Zn in enumerate(Mandelbrot(0.2 + 0.7j, 10)):
+    #     print(f"Zap.št. {i} Rezultat {Zn} Abs. vrednost {abs(Zn)}")
+    # print(f(1,2,3))
+    # print(f(1)(2,3))
+    # print(f(1,2)(3))
+    # print(f(1)(2)(3))
+    squares = Squares(10)
+    print(list(squares))

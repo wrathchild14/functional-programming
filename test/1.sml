@@ -191,3 +191,16 @@ fun nti (sez, n) =
         (List.filter (fn (x, y) => x = n) (ListPair.zip 
             (List.tabulate (List.length sez, fn x => x), sez)));
 
+
+datatype ('a, 'b) node = Node of (('b, 'a) node * ('a) * ('b, 'a) node) | fin
+
+fun height drevo =
+ case drevo of
+ fin => 0
+ | Node (l, _, d) => Int.max (1 + height l, 1 + height d);
+
+val test_node1 = Node (Node (fin, 1, fin), 2, Node (fin, 3, fin));
+val test_node2 = Node (Node (fin, 1, fin), 2, Node (Node (fin, 3, fin), 4, fin));
+
+val test1 = height test_node1;
+val test2 = height test_node2;
