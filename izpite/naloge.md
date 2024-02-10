@@ -700,3 +700,63 @@ fun product_of_pairs_more xs =
     List.map (fn (x, y) => x * y) pairs
   end;
 ```
+
+3. NALOGA:
+V programskem jeziku Racket je podano ogrodje interpreterja za jezik JAIS, kot smo to naredili na predavanjih:
+(struct konst (int) #:transparent) ; konstanta; argument je stevilo
+(struct sestej (e1 e2) #:transparent) ; e1 in e2 sta izraza
+(struct mnozi (e1 e2) #:transparent) ; e1 in e2 sta izraza
+(struct bool (b) #:transparent) ; b ima lahko vrednost true or false
+(define (jais e)
+ (cond [(konst? e) e] ; vrnemo izraz v ciljnem jeziku
+ [(bool? e) e]
+ [(sestej? e) <<< tukaj sledi koda za implementacijo seštevanja >>>]
+ [(mnozi? e) <<< tukaj sledi koda za implementacijo množenja >>>]
+ ))
+V zgornjem interpreterju sta implementirana seštevanje in množenje (predpostavi, da je koda že napisana –
+implementiranje ni del izpitne naloge). V jezik interpreterja lahko torej prevedemo izračun izraza 2×3+1 (kar
+znaša 7) v
+> (jais (sestej (mnozi (konst 2) (konst 3)) (konst 1)))
+(konst 7)
+Denimo pa, da želimo interpreterju ukazati, naj upošteva drugačno prioriteto operatorjev pri izračunu izraza
+2×3+1, in sicer naj izračuna 2×(3+1), kar znaša 8. To bi lahko sicer opravili s klicem:
+> (jais (mnozi (konst 2) (sestej (konst 3) (konst 1)))
+(konst 8)
+vendar pa želimo ubrati drugačno pot, kot je opisano v nadaljevanju.
+Implementiraj konstrukt (prioriteta izraz), ki sprejme izraz za seštevanje (sestej e1 e2), katerega
+sintaksno drevo ima natanko tri konstante, in naj v njih obrne zaporedje prednosti izračunov. Torej:
+ če je izraz oblike (sestej (mnozi e3 e4) e2), naj bo rezultat (mnozi e3 (sestej e4 e2))
+ če je izraz oblike (sestej e1 (mnozi e3 e4)), naj bo rezultat (mnozi (sestej e1 e3) e4)
+Na vse drugačne oblike vhodnega izraza naj konstrukt prioriteta nima vpliva. Primer uporabe:
+> (jais (prioriteta (sestej (mnozi (konst 2) (konst 3)) (konst 1))))
+(konst 8)
+
+(struct prioriteta (e) #:transparent) ; e is an expression
+
+(define (jais e)
+ (cond [(konst? e) e] ; return the expression in the target language
+       [(bool? e) e]
+       [(sestej? e) <<< code for addition implementation goes here >>>]
+       [(mnozi? e) <<< code for multiplication implementation goes here >>>]
+       [(prioriteta? e)
+        (let ([e (prioriteta-e e)])
+          (cond [(and (sestej? e) (mnozi? (sestej-e1 e)))
+                 (mnozi (mnozi-e1 (sestej-e1 e)) (jais (sestej (mnozi-e2 (sestej-e1 e)) (sestej-e2 e))))]
+                [(and (sestej? e) (mnozi? (sestej-e2 e)))
+                 (mnozi (jais (sestej (sestej-e1 e) (mnozi-e1 (sestej-e2 e)))) (mnozi-e2 (sestej-e2 e)))]
+                [else e]))]))
+
+4. NALOGA:
+V programskem jeziku Python 3 napišite dekorator enkrat, ki dovoli le en klic funkcije z enakimi argumenti.
+Če jo z enakimi argumenti pokličemo še enkrat, naj se izpiše napaka ali proži izjema. Tako npr. prvi klic
+f(2,3) uspe, drugi klic f(2,3) pa ne. Omejite se le na pozicijske argumente. 
+
+def enkrat(f):
+  cache = set()
+  def wrapper(*args):
+    if args in cache:
+      raise ValueError(f"Function {f.__name__} has already been called with these arguments: {args}")
+    else:
+      cache.add(args)
+      return f(*args)
+  return wrapper
