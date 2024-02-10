@@ -117,15 +117,17 @@ val it = 18 : int
 val it = ref (true,rez 18) : (bool * int thunk) ref
 
 datatype 'a thunk = Thunk of (unit -> 'a) | Value of 'a
-fun mydelay f = refcell := Thunk f
+fun mydelay f = ref (false, f)
+
 fun myforce refcell =
     case !refcell of
-        Thunk f => let 
+        (false, Thunk f) => 
+                let 
                     val x = f ()
-                   in 
-                    refcell := Value x; x
-                   end
-      | Value x => x
+                in 
+                    refcell := (true, Value x); x
+                end
+      | (true, Value x) => x
 
 
 b) Podaj podatkovna tipa funkcij mydelay in myforce.
