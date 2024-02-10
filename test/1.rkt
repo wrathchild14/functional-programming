@@ -107,3 +107,7 @@
     (iter lst empty))
 
 (displayln (my-map (lambda (x) (* x x)) (list 1 2 3 4 5)))
+
+; primer za Lazno negativen primer, it will compile successfully, but it will fail at runtime
+(define (add x y) (+ x y))
+; (add "hello" 1)
