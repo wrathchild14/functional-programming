@@ -96,3 +96,14 @@
   (if #t
       0
       (/ 4 "hello")))
+
+(define (my-map f lst)
+  (define (iter lst backward-result)
+    (cond
+      [(empty? lst) (reverse backward-result)]
+      [else (iter (rest lst)
+        (cons (f (first lst))
+        backward-result))]))
+    (iter lst empty))
+
+(displayln (my-map (lambda (x) (* x x)) (list 1 2 3 4 5)))

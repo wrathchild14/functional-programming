@@ -49,6 +49,12 @@ fun height drevo =
   | Node (l, _, d) => 1 + Int.max (height l, height d);
 
 
+fun F 0 b = 0
+    | F a b = b + F (a-1) b;
+
+fun G a 0 = 1
+    | G a b = F a (G a (b-1));
+
 fun F2bad a b =
     let
         fun pomozna(a, b, acc) =
@@ -204,3 +210,19 @@ val test_node2 = Node (Node (fin, 1, fin), 2, Node (Node (fin, 3, fin), 4, fin))
 
 val test1 = height test_node1;
 val test2 = height test_node2;
+
+(* O(2^n) via naturally recursive algorithm. *)
+fun fibexp 0 = 1
+    | fibexp 1 = 1
+    | fibexp n = fibexp (n-2) + fibexp (n-1)
+
+(* O(n) via double-accumulator tail-recursive algorithm. *)
+fun fibn 0 = 1
+    | fibn 1 = 1
+    | fibn x =
+    let fun
+        helper (acc1, acc2, y) =
+            if y=x
+            then acc1 + acc2
+            else helper (acc1 + acc2, acc1, y + 1)
+    in helper (1,1,3) end
