@@ -762,3 +762,111 @@ def enkrat(f):
       cache.add(args)
       return f(*args)
   return wrapper
+
+
+
+1. NALOGA:
+V programskem jeziku SML je podana naslednje funkcija:
+fun nekaj a b c d e f = a (b c) (d e);
+a) Določi podatkovni tip zgornje funkcije.
+('a -> 'b -> 'c -> 'd) -> 'a -> ('e -> 'b) -> 'e -> 'c -> 'd
+b) Zapiši anonimno funkcijo, ki je semantično ekvivalentna podani funkciji nekaj.
+fn a => fn b => fn c => fn d => fn e => fn f => a (b c) (d e)
+c) Zapiši novo funkcijo kvadrat, ki je definirana kot aplikacija funkcije višjega reda nekaj. Funkcija kvadrat
+sprejme argument (x,y) in vrača rezultat: 𝑘𝑣𝑎𝑑𝑟𝑎𝑡(𝑥, 𝑦) = 𝑥^2 + 2𝑥 + 𝑦^2
+(opomba: možnih je več
+pravilnih rešitev).
+fun kvadrat (x, y) = nekaj (fn a => fn b => fn c => a*a + 2*b + c*c) x (fn z => z) x y y
+
+
+3. NALOGA:
+Podana sta naslednja podatkovna tipa:
+datatype prvi = X of int | Y of prvi | Z of drugi
+ and drugi = W of prvi | tretji
+datatype rezultat = P | D
+Napiši vzajemno rekurzivni funkciji
+preveri_prvi : prvi -> rezultat
+preveri_drugi : drugi -> rezultat
+ki prejmeta ustrezen izraz tipa prvi ali tipa drugi in preverita, ali se izraz konča z vrednostjo podatkovnega
+tipa prvi (v tem primeru naj vrne vrednost P) ali vrednostjo podatkovnega tipa drugi (v tem primeru naj vrne
+vrednost D). Primera:
+- preveri_prvi (Z (W (Z (W (X 3))))); (* X 3 je tipa prvi, zato P *)
+val it = P : rezultat
+- preveri_prvi (Z (W (Y (Z tretji)))); (* tretji je tipa drugi, zato D *)
+val it = D : rezultat
+- preveri_drugi (W (Y (Z tretji))); (* tretji je tipa drugi, zato D *)
+val it = D : rezultat
+
+datatype prvi = X of int | Y of prvi | Z of drugi
+ and drugi = W of prvi | tretji
+datatype rezultat = P | D
+
+fun preveri_prvi (X _) = P
+  | preveri_prvi (Y p) = preveri_prvi p
+  | preveri_prvi (Z d) = preveri_drugi d
+and preveri_drugi tretji = D
+  | preveri_drugi (W p) = preveri_prvi p
+
+
+4. NALOGA:
+Denimo, da podatkovne tipe prvi, drugi, rezultat in funkciji preveri_prvi ter preveri_drugi ovijemo
+v modul izrazi (structure izrazi). Modulu nato pripišemo enega od podpisov (signature) izraz1,
+izraz2 ali izraz3. Za vsakega izmed njih komentiraj (največ 2 povedi), kako podpis vpliva na uporabnost in
+delovanje modula. Če je modul neuporaben (da napisanih funkcij ne moremo uporabljati), podaj razlog za
+neuporabnost.
+a.)
+signature izraz1 =
+sig
+ type prvi
+ type drugi
+ datatype rezultat = D | P
+ val preveri_prvi : prvi -> rezultat
+ val preveri_drugi : drugi -> rezultat
+end
+
+The signature izraz1 only declares the types prvi and drugi without specifying their structure. This means that the module is unusable because we cannot construct values of these types to use with the functions preveri_prvi and preveri_drugi.
+
+b.)
+signature izraz2 =
+sig
+ datatype prvi = X of int | Y of prvi | Z of drugi
+ datatype drugi = W of prvi | tretji
+ datatype rezultat = D | P
+ val preveri_prvi : prvi -> rezultat
+ val preveri_drugi : drugi -> rezultat
+end
+
+The signature izraz2 fully specifies the structure of the types prvi and drugi, making the module fully usable. We can construct values of these types and use them with the functions preveri_prvi and preveri_drugi.
+
+c.)
+Zapiši novi podpis izraz3 tako, da dopolniš podpis
+izraz1 (zapisane vrstice pusti nespremenjene,
+lahko samo dodaš nove vrstice v podpisu) tako, da
+bo deloval naslednji klic:
+- izrazi.preveri_prvi (izrazi.Z (izrazi.W (izrazi.X
+3)));
+val it = P : izrazi.rezultat
+
+
+signature izraz3 =
+sig
+ type prvi
+ type drugi
+ datatype rezultat = D | P
+ val X : int -> prvi
+ val Y : prvi -> prvi
+ val Z : drugi -> prvi
+ val W : prvi -> drugi
+ val tretji : drugi
+ val preveri_prvi : prvi -> rezultat
+ val preveri_drugi : drugi -> rezultat
+end
+
+d.)
+Kaj se zgodi, če v podpisu iz naloge c.(podpis izraz3)
+spremeniš vrstico
+ datatype rezultat = D | P
+v
+ type rezultat ?
+
+ If you change the line datatype rezultat = D | P to type rezultat in the signature izraz3, the module becomes unusable because the type rezultat is not fully specified. We cannot construct values of type rezultat to use as the return type of the functions preveri_prvi and preveri_drugi.
