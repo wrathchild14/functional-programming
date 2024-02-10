@@ -252,6 +252,7 @@ elementa in tretja komponenta naj hrani funkcijo za generiranje naslednjega elem
 a) Napiši tok, ki se imenuje potence in se prične z vrednostjo 2. Vsaka vrednost prejšnjega elementa naj
 bo za faktor 2 manjša, vsaka naslednja vrednost toka pa za faktor 2 večje.
 b) Napiši makre prejsnji, trenutni in naslednji, ki poenostavijo dostop do elementov tega toka.
+```
 Primer:
 > potence
 '(#<procedure> 2 #<procedure>)
@@ -265,6 +266,7 @@ Primer:
 '(#<procedure> 32 #<procedure>)
 > (trenutni (naslednji (naslednji (naslednji (naslednji potence)))))
 32
+```
 
 (define (make-stream prev-fn current next-fn)
   (list prev-fn current next-fn))
@@ -290,13 +292,16 @@ Primer:
 
 Na predavanjih smo pokazali, kako v programskem jeziku Python "na roke" implementiramo currying.
 a) Implementiraj dekorator z imenom curry3, ki za poljubno funkcijo z natanko tremi pozicijskimi
-argumenti izpiše, koliko argumentov je bilo podano s pristopom currying. Primer: Denimo, da
+argumenti izpiše, koliko argumentov je bilo podano s pristopom currying. 
+
+Primer: Denimo, da
 dekorator pripišemo naslednji funkciji:
 @curry3
 def f(a,b,c):
  return a+b+c
 Želimo, da naslednji klici funkcije izpišejo želeni podatek in šele nato podajo rezultat:
->>> f(1,2,3)
+```
+>>>f(1,2,3)
 Curryied parametrov: 1
 6
 >>> f(1)(2,3)
@@ -308,7 +313,7 @@ Curryied parametrov: 2
 >>> f(1)(2)(3)
 Curryied parametrov: 3
 6
-
+```
 def curry3(func):
     def curried(*args):
         if len(args) < 3:
@@ -326,39 +331,54 @@ b) (splošno vprašanje) Denimo, da neko funkcijo implementiramo na dva načina 
 funkcijskem programskem jeziku): (1) kot funkcijo, ki sprejema argumente kot terko in (2) kot funkcijo,
 ki uporablja currying za sprejemanje argumentov. Kateri funkcijski klic bo načeloma deloval hitreje in
 zakaj?
+
 Generally, a function call that uses currying will be slower than a function call that takes all arguments at once. This is because each call to a curried function creates a new function that needs to be stored in memory, which takes time. In contrast, a function call that takes all arguments at once can be executed immediately. However, the difference in speed is usually negligible and would only be noticeable for very large numbers of function calls. The advantage of currying is that it allows for more flexible function calls and can make the code easier to read and understand.
 
 
 
 Podaj odgovore na naslednja vprašanja (največ 2 povedi na vprašanje):
 a) Ali v programskem jeziku Racket obstaja polimorfizem? Razloži.
+
  Yes, Racket supports polymorphism. It is a dynamically typed language, which means a function can accept arguments of any type and behave differently based on the type of the arguments it receives.
+
 b) Pojasni, kako se prenašajo parametri v jeziku SML pri (1) definiciji funkcije in (2) pri funkcijskem klicu –
 po vrednosti ali po imenu? Pojasni oba odgovora.
+
  In Standard ML (SML), parameters are passed by value. This means that when a function is defined or called, a copy of the actual parameter is made and passed to the function. Changes made to the parameter inside the function do not affect the original argument.
+
 c) Katere izmed pojavitev spremenljivk v naslednji funkciji moramo nujno hraniti v funkcijski ovojnici?
 Razloži:
+```
 (lambda (b) (+ (let ([a 2]) (- a))
  (- a)
  (let ([c b]) c)
  (let ([b c]) b)))
+```
 
  In the given lambda function, the occurrences of variables a and b that are bound in the let expressions need to be stored in the closure. This is because they might be used later in the function after their binding expressions have exited scope.
+
 d) Kaj je to sintaksno abstraktno drevo? Kakšno vlogo je igralo pri izdelavi interpreterja za JAIS?
+
  A syntax abstract tree (AST) is a tree representation of the abstract syntactic structure of source code. It played a crucial role in the creation of the JAIS interpreter as it is used to parse the source code into a structure that can be easily processed to generate the desired output or perform other analyses.
 
 
 V programskem jeziku SML so podani opisi artiklov in seznam nakupov:
+```
 val r1 = {artikel="kruh", cena_enote=2.5, enot=4}
 val r2 = {artikel="mleko", cena_enote=1.2, enot=3}
 val r3 = {artikel="sir", cena_enote=3.4, enot=5}
 val nakup = [("branko", [r1,r2]), ("natasa", [r2,r3]), ("branko", [r3])]
+```
+
 Pri vsakemu artiklu so podani: naziv artikla (npr. "kruh"), cena enote in število kupljenih enot. Strošek nakupa
 artikla torej izračunamo kot produkt količin cena_enote in enot. Seznam nakupov podaja, kdo je kupil
 katerega od artiklov (npr. branko je kupil artikla r1 in r2 itd.). Naloge:
+
 a) Kakšen je podatkovni tip seznama nakup?
+
 item = {artikel: string, cena_enote: real, enot: int}
 nakup = (string * item list) list
+
 b) Napiši funkcijo fun zapravil sez ime, ki sprejme seznam nakupov in ime kupca, ter vrne skupni
 strošek nakupa. Pri implementaciji funkcije obvezno uporabi:
  rekurzivno gnezdenje vzorcev in
