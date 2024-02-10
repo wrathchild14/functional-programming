@@ -48,10 +48,16 @@ fun height drevo =
     fin => 1
   | Node (l, _, d) => 1 + Int.max (height l, height d);
 
-
+(* In the recursive case of F, the result of the recursive call F (a-1) b is not the final result of the function. 
+Instead, the final result is obtained by adding b to the result of the recursive call. 
+This means that after the recursive call returns, there is still an addition operation left to perform, 
+so F is not tail recursive. *)
 fun F 0 b = 0
     | F a b = b + F (a-1) b;
 
+(* In the recursive case of G, the result of the recursive call G a (b-1) is used as an argument to the function F. 
+This means that after the recursive call returns, there is still a function call left to perform, 
+so G is not tail recursive. *)
 fun G a 0 = 1
     | G a b = F a (G a (b-1));
 
