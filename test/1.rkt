@@ -111,3 +111,19 @@
 ; primer za Lazno negativen primer, it will compile successfully, but it will fail at runtime
 (define (add x y) (+ x y))
 ; (add "hello" 1)
+
+(define (splosna f1 f2 zacetek konec)
+  (if (> zacetek konec)
+      null
+      (cons (f1 zacetek)
+            (splosna f1 f2 (f2 zacetek) konec))))
+
+(define (stetje zacetek konec)
+  (splosna (lambda (a) a) (lambda (a) (+ a 1)) zacetek konec))
+
+(define (sinus zacetek konec)
+  (splosna sin (lambda (a) (+ a (/ pi 8))) zacetek konec))
+
+(displayln (stetje 1 5))
+
+(displayln (sinus 0 (/ pi 2)))
