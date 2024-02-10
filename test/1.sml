@@ -232,3 +232,24 @@ fun fibn 0 = 1
             then acc1 + acc2
             else helper (acc1 + acc2, acc1, y + 1)
     in helper (1,1,3) end
+
+fun a b c =
+ case b of
+    {d=u, e=v} => if (u=1) andalso (v=false)
+    then 3.14
+    else c b
+
+fun product_of_pairs xs =
+  let
+    val shifted_xs = tl xs
+  in
+    ListPair.map (fn (x, y) => x * y) (xs, shifted_xs)
+  end;
+
+fun product_of_pairs_more xs =
+  let
+    val ys = tl xs
+    val pairs = ListPair.zip (xs, ys)
+  in
+    List.map (fn (x, y) => x * y) pairs
+  end;

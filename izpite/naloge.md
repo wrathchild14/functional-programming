@@ -634,3 +634,49 @@ Primer:
         (append rest (map (lambda (x) (cons first x)) rest)))))
 
 
+1. NALOGA:
+Podaj odgovore na naslednja vprašanja (največ 2 povedi na vprašanje):
+a) Zakaj pristop currying deluje počasneje, kot če uporabljamo funkcije z več argumenti?
+- dodatni klici funkcij, vecja poraba pomnilnika, zapletenost implementacije
+i would say, because functions in SML are passed by value and there wont be more calculations, in contrast to currying.
+
+b) Zakaj je pomembno, da makro sistem uporablja leksikalni doseg?
+- Predvidljivost, izolacija (marko ne more nenamerno spreminiti ali biti vplivan s spremenljivkami v okolju, kjer je klican), optimizacija (da kompajler ve, na katero vezavo se nanasa doloceno ime)
+
+c) Čemu je namenjen postopek optimizacije funkcijskih ovojnic? Kako jih optimiziramo, kaj s tem
+pridobimo?
+- Optimizacija funkcijskih ovojnic običajno vključuje odstranjevanje nepotrebnih spremenljivk iz ovojnice. S tem pridobimo večjo učinkovitost in zmogljivost, saj se zmanjša poraba pomnilnika in potencialno tudi čas izvajanja. Poleg tega lahko optimizacija funkcijskih ovojnic izboljša tudi čitljivost in vzdrževanje kode, saj odstranjuje nepotrebne spremenljivke in poenostavlja strukturo funkcij.
+
+d) Določi podatkovni tip naslednji funkciji:
+fun a b c =
+ case b of
+ {d=u, e=v} => if (u=1) andalso (v=false)
+ then 3.14
+ else c b
+- fun a = {d:int, e:bool} -> ({d:int, e:int} -> real) -> real
+
+2. NALOGA:
+V programskem jeziku SML zapiši funkcijo, ki prejme seznam celih števil. Funkcija naj nato izračuna produkt
+zaporednih elementov v seznamu, torej produkt prvega in drugega elementa, produkt drugega in tretjega
+elementa itn. Rezultat funkcije naj bo torej seznam produktov (celih števil), ki je za 1 element krajši od
+vhodnega seznama.
+Implementacijo implementiraj izključno s funkcijami višjega reda (map/filter/fold).
+Primer delovanja:
+- produkt [4,3,2,7,5];
+val it = [12,6,14,35] : int list
+```
+fun product_of_pairs xs =
+  let
+    val shifted_xs = tl xs
+  in
+    ListPair.map (fn (x, y) => x * y) (xs, shifted_xs)
+  end;
+
+fun product_of_pairs_more xs =
+  let
+    val ys = tl xs
+    val pairs = ListPair.zip (xs, ys)
+  in
+    List.map (fn (x, y) => x * y) pairs
+  end;
+```
