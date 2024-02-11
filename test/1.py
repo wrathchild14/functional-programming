@@ -7,11 +7,15 @@ def Mandelbrot(c, maxstep):
         Zn = Zn**2 + c
 
 def curry3(func):
+    count = 0
     def curried(*args):
+        nonlocal count
+        count += 1
         if len(args) < 3:
-            print(len(args))
             return lambda *args2: curried(*(args + args2))
         else:
+            print("Curried parametrov: ", count)
+            count = 0
             return func(*args)
     return curried
 
@@ -51,5 +55,9 @@ if __name__ == "__main__":
     # print(f(1)(2,3))
     # print(f(1,2)(3))
     # print(f(1)(2)(3))
-    squares = Squares(10)
-    print(list(squares))
+    # squares = Squares(10)
+    # print(list(squares))
+    print(f(1,2,3))
+    print(f(1)(2,3))
+    print(f(1,2)(3))
+    print(f(1)(2)(3))

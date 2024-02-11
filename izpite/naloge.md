@@ -317,11 +317,15 @@ Curryied parametrov: 3
 6
 ```
 def curry3(func):
+    count = 0
     def curried(*args):
+        nonlocal count
+        count += 1
         if len(args) < 3:
-            print(len(args))
             return lambda *args2: curried(*(args + args2))
         else:
+            print("Curried parametrov: ", count)
+            count = 0
             return func(*args)
     return curried
 
@@ -870,3 +874,34 @@ v
  type rezultat ?
 
  If you change the line datatype rezultat = D | P to type rezultat in the signature izraz3, the module becomes unusable because the type rezultat is not fully specified. We cannot construct values of type rezultat to use as the return type of the functions preveri_prvi and preveri_drugi.
+
+
+1. NALOGA:
+Denimo, da tokove implementiramo kot spremenljive pare (mcons) namesto kot navadne (cons).
+Zapiši funkcijo (razvij tok n), ki podani tok dodatno razvije za novih n elementov. To pomeni,
+da vsak klic funkcije podaljša rep toka za n elementov. Primeri:
+> naravna ; tok naravnih števil
+(mcons 1 #<procedure>)
+> (razvij naravna 2)
+> naravna
+(mcons 1 (mcons 2 (mcons 3 #<procedure>))))
+> (razvij naravna 2)
+> naravna
+(mcons 1 (mcons 2 (mcons 3 (mcons 4 (mcons 5 #<procedure>))))))
+> (razvij naravna 1)
+> naravna
+(mcons 1 (mcons 2 (mcons 3 (mcons 4 (mcons 5 (mcons 6 #<procedure>)))))))
+
+#lang racket
+
+(define naravna (letrec ([f (lambda (x) (mcons x (delay (f (+ x 1)))))])
+                  (f 1)))
+
+; doesnt work, it doesnt append new stream
+(define (razvij tok n)
+  (if (zero? n)
+      tok
+      (begin
+        (set-mcdr! tok (force (mcdr tok)))
+        (razvij (force (mcdr tok)) (- n 1)))))
+
