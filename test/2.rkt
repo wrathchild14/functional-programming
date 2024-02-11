@@ -23,21 +23,21 @@
       (set! c c)))
   (list a b c))
 
-(define-syntax swap
-    (syntax-rules ()
-        ((swap x y)
-            (let ([tmp x])
-              (set! x y)
-              (set! y tmp)))))
 
-(let* ([tmp 5]
-       [other 6])
-    (let ([tmp tmp])
-        (set! tmp other)
-        (set! other tmp))
-    (list tmp other))
+(define-syntax-rule (swap x y)
+  (let ([tmp x])
+    (set! x y)
+    (set! y tmp)))
 
- (let ([tmp 5]
-       [other 6])
-    (swap tmp other)
-    (list tmp other))
+(let ([tmp 5]
+      [other 6])
+  (swap tmp other)
+  (displayln (list tmp other)))
+
+
+(let ([tmp 5]
+      [other 6])
+  (let ([tmp tmp])
+    (set! tmp other)
+    (set! other tmp))
+  (displayln (list tmp other)))
