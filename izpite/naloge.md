@@ -905,3 +905,86 @@ da vsak klic funkcije podaljša rep toka za n elementov. Primeri:
         (set-mcdr! tok (force (mcdr tok)))
         (razvij (force (mcdr tok)) (- n 1)))))
 
+
+3. NALOGA:
+Denimo, da sta v programskem jeziku Racket podana makra swap in rotate:
+(define-syntax-rule (swap a b)
+ (let ([c a])
+ (set! a b)
+ (set! b c)))
+(define-syntax rotate
+ (syntax-rules ()
+ [(rotate a b c) (begin
+ (swap a b)
+ (swap b c))]))
+Denimo tudi, da imamo tudi v naslednjem delu programske kode zapisan klic:
+(let ([a 5]
+ [b 6]
+ [c 7])
+ (rotate a b c)
+ (list a b c))
+Naloge:
+a) Zapiši makro razširitev zgornjega dela programske kode, ki bi bil rezultat v programskem
+jeziku, ki uporablja naivno makro razširitev.
+
+(let ([a 5]
+      [b 6]
+      [c 7])
+  (begin
+    (let ([c a])
+      (set! a b)
+      (set! b c))
+    (let ([c b])
+      (set! b c)
+      (set! c c)))
+  (list a b c))
+b) Zapiši rezultat (izpis) zgornje programske kode v sistemu, ki uporablja naivno makro
+razširitev.
+
+The result of running the above code would be (6 6 6). This is because the swap macro doesn't take into account the current bindings of a, b, and c in the let expression, leading to all variables being set to 6.
+c) Kakšen je rezultat v programskem jeziku Racket? Zakaj?
+
+In Racket, which uses hygienic macro expansion, the result would be (6 7 5). This is because Racket's macro system automatically renames variables to avoid clashes like the one we saw in the naive macro expansion. The swap macro would be expanded in a way that doesn't interfere with the let bindings of a, b, and c.
+
+4. NALOGA:
+V določenih primerih morajo funkcije v našem programu klice ponavljati, dokler ne uspejo. V
+programskem jeziku Python napišite dekorator, ki skrbi za takšne ponovitve:
+a) Dekorator RETRY naj poljubno funkcijo zaganja s premori ene sekunde, vse dokler klic ne uspe
+ali največ desetkrat. Pri vsaki ponovitvi naj dekorator izpiše številko ponovitve in vse klicne
+argumente.
+Napotek: premor dolžine 1 sekunde lahko dosežete s klicem time.sleep(1)
+Primer dekoriranja funkcije:
+@RETRY
+def f(a,b)
+b) Parametrizirajte dekorator RETRY (ne funkcije, ki jo dekorirate) s tem, da mu podate
+maksimalno število ponovitev kot parameter (ki lahko torej opredeli drugačno maksimalno
+število ponovitev kot 10). Tudi tukaj naj pri vsaki ponovitvi dekorator izpiše številko ponovitve
+in vse klicne argumente.
+Napotek: Argument dekoratorju posredujete tako, da izdelate funkcijo višjega reda, ki
+sprejema argument in vrača dekorator.
+Primer dekoriranja funkcije:
+@RETRY(10)
+def f(a,b)
+
+def RETRY(max_retries=10):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for i in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    print(f"Attempt {i+1} failed with arguments {args} and {kwargs}. Retrying...")
+                    time.sleep(1)
+            print(f"Function failed after {max_retries} attempts.")
+        return wrapper
+    return decorator
+
+@RETRY()
+def f(a, b):
+    # Your function implementation here
+    pass
+
+@RETRY(5)
+def g(a, b):
+    # Your function implementation here
+    pass
