@@ -37,3 +37,14 @@ fun vsakdrug sez =
   end;
 
 vsakdrug [4,5,6,7,8,9,8,7,6];
+
+fun sestej1 (trojcek: int*int*int) = 
+    let 
+        val (a,b,c) = trojcek
+    in a + b + c
+    end
+
+fun sestej2 (a, b, c) = a + b + c
+
+fun testna a {a=b, b=c} = 
+    List.map (fn x => a + (valOf b) - c(a)) 

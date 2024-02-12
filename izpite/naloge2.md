@@ -749,6 +749,7 @@ sig
 end
 Odgovori na naslednja vprašanja:
 a) Ali je podpis LogSig1 skladen z modulom?
+ne, v signature ni exception
 b) Kaj se zgodi ob klicu funkcij izdelaj in obdelaj?
 The izdelaj function takes a tuple (x, y) of type vrednost, checks if y is less than 10, and if so, returns the vrednost tuple (x, y). If y is not less than 10, it raises the Napaka exception. The obdelaj function takes a tuple (x, y), negates x, and if y is even, it subtracts 1 from y, otherwise it adds 1 to y. It then returns the tuple (not x, new_y).
 c) S čim je potrebno dopolniti kodo za zagotovitev programov v modulu?
@@ -811,7 +812,7 @@ fun mf x y =
  case (x,y) of
  (a, _) => a [3]
 
-((int list -> 'a) * 'b) -> 'a
+(int list -> 'a) -> 'b -> 'a
 c) Na kakšne vse načine lahko optimiziramo funkcijske ovojnice v programskih jezikih?
 Inlining: If the function is small, it can be inlined to avoid the overhead of a function call.
 Dead code elimination: If the closure does not use some of the captured variables, they can be removed.
@@ -845,7 +846,7 @@ The function process2 has fewer arguments because it uses foldr, which encapsula
 c) Podaj ustrezno definicjo argumenta step.
 fun step y xs =
     if x < y then x::y::xs
-    else y::(process x xs)
+    else y::(step x xs)
 
 
 3. NALOGA
@@ -984,3 +985,33 @@ fun fold_set f z s =
 val f1 = fold_set (fn a => fn b => List.length a + b) 0
 val f2 = fold_set (fn a => fn b => List.foldl op* 1 a * b) 1
 val f3 = fold_set (fn _ => fn b => b) 0
+
+
+
+2. NALOGA:
+Podane so funkcije f1, f2 in f3:
+fun f1 s =
+ case s of
+ SOME (a, b) => List.length a + b
+ | NONE => 0
+fun f2 s =
+ case s of
+ SOME (a, b) => a + (List.foldl op+ 0 b)
+ | NONE => 1
+fun f3 s =
+ case s of
+ SOME (a, b) => SOME (a*b)
+ | NONE => NONE
+a) Zapiši posplošeno funkcijo višjega reda (refaktoriziraj kodo), s katero lahko implementiraš delovanje
+vseh treh podanih funkcij.
+b) Poleg kode posplošene funkcije zapiši tudi delne aplikacije posplošene funkcije, s katerimi dosežemo
+enako delovanje kot je delovanje podanih funkcij f1, f2 in f3
+
+fun fold_option f z s =
+  case s of
+    SOME (a, b) => f a b
+  | NONE => z
+
+val f1 = fold_option (fn a => fn b => List.length a + b) 0
+val f2 = fold_option (fn a => fn b => a + (List.foldl op+ 0 b)) 1
+val f3 = fold_option (fn a => fn b => SOME (a * b)) NONE
