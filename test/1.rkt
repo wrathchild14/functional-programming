@@ -22,6 +22,13 @@
         (izpisi (- n 1) ((cdr tok))))
       (displayln (car tok))))
 
+(define (izpisi2 n tok) 
+    (if (> n 1)
+        (begin
+            (displayln (car tok))
+            (izpisi2 (- n 2) ((cdr ((cdr tok))))))
+        (displayln (car tok))))
+
 (define (prozi f n)
   (define (helper i)
     (cons (if (= i n)
