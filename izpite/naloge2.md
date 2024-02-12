@@ -36,6 +36,7 @@ Določi podatkovni tip funkcije mojamoja
 NALOGA 3 (8 točk / 70)
 Kateri od naslednjih programov v SML uporabljajo repno rekurzijo?
 Izberi enega ali več odgovorov:
+```
 fun prestejpoz sez =
  let
 fun pomozna (sez, acc) =
@@ -66,6 +67,7 @@ fun fib (n:int) =
  if n=1 then 1
  else if n=2 then 1
  else fib(n-1) + fib(n-2)
+ ```
 
 prestejpoz: This function uses tail recursion. The recursive call to pomozna is the last operation in each branch of the if statement.
 
@@ -542,3 +544,443 @@ print(next(approximations))  # prints 2.0
 print(next(approximations))  # prints 2.5
 # and so on...
 
+
+1. NALOGA
+Denimo, da sami definirate lasten programski jezik, ki ima trden in ustavljiv sistem tipov. Odgovori na naslednja
+vprašanja:
+a) Naštej vsaj tri stvari (na podlagi izkušenj pri programskih jezikih, ki smo jih uporabljali pri predmetu), ki jih pri
+implementaciji tega novega programskega jezika moramo definirati v okviru definicije semantike jezika.
+
+sitaksa, tipizator in pravila za evaluacijo?, makri
+b) Na kratkem primeru programa (ki ga zapiši v sintaksi poljubnega jezika ali psevdokodi) podaj primer lažno
+negativnega (false positive) programa in utemelji lažno negativnost.
+c) Podaj primere treh obstoječih programskih jezikov, ki imajo trden in ustavljiv tipizator in jih razdeli med implicitno
+in eksplicitno tipizirane jezike
+
+b)
+#lang racket
+
+(define (add-or-concat a b)
+  (if (and (number? a) (number? b))
+      (+ a b)
+      (if (and (string? a) (string? b))
+          (string-append a b)
+          (error "Invalid arguments"))))
+e ; This will work
+(add-or-concat 1 2) ; This will also work
+(add-or-concat 1 "world!") ; This will cause an error in runtime
+
+
+2. NALOGA
+V programskem jeziku SML so podani trije programi (funkcije f1, f2 in f3), ki sprejmejo seznam elementov in
+izračunajo:
+ f1: vsoto dolžin nizov v seznamu,
+ f2: vsoto dolžin podseznamov, ki so elementi seznama,
+ f3: vsoto kvadratov elementov seznama.
+a) Zapiši funkcijo višjega reda, ki posplošuje zgornje tri funkcije. Pri njeni definciji uporabi znane funkcije višjega reda
+(map, filter, fold), če je to primerno, in uporabi currying.
+b) Zapiši delne aplikacije posplošene funkcije v nove funkcije f1plus, f2plus in f3plus, ki izvajajo enake naloge kot
+njihovi izvorni pari.
+
+(* Higher-order function *)
+fun higherOrderFunc f g = foldl (fn (x, acc) => acc + f (g x)) 0
+
+(* Partially applied functions *)
+val f1plus = higherOrderFunc String.length (fn x => x)
+val f2plus = higherOrderFunc length (fn x => x)
+val f3plus = higherOrderFunc (fn x => x * x) (fn x => x)
+
+4. NALOGA
+V programskem jeziku Racket definiraj konstrukt (struct) drevo, ki ima komponente id (unikatna oznaka vozlišča -
+niz), left (levo poddrevo), value (vrednost v vozlišču) in right (desno poddrevo).
+S tem konstruktom lahko zapišemo drevo kot vgnezdeno strukturo, v kateri »null« predstavlja prazno poddrevo.
+Denimo, da s tem konstruktom zapisujemo binarna iskalna drevesa, kot je npr:
+(define example
+ (tree "koren"
+ (tree "l" (tree "ll" null
+ 2
+(tree "lld" null 3 null))
+ 5
+ (tree "ld" null 7 null))
+ 10
+ (tree "d" null
+ 15
+ (tree "dd" null
+ 17
+(tree "ddd" null 19 null)))))
+Na opisanem drevesu želimo zaporedno iskanje več elementov v podanem seznamu, za kar bomo uporabili poisci.
+Nalogi:
+a) Napiši funkcijo poisci, ki sprejme seznam elementov in vrne seznam logičnih vrednosti, ki ustrezajo temu, ali
+soležni element iz vhodnega seznama obstaja v drevesu. Funkcija naj uporablja princip memoizacije. Memoizacijo
+naj izvaja tako, da ob vsakem iskanju nekega elementa (npr. elementa 6 v spodnjem primeru) shrani v seznam
+rešitev vse elemente na poti (na poti v spodnjem primeru sta elementa 5 in 7, ne pa tudi 2 in 3). Ob kasnejšem
+iskanju npr. elementa 7, ga funkcija vrne iz seznama rešitev in se ne išče po drevesu. Za vsak najden element naj
+funkcija vrne ime vozlišča, v katerem je vrednost elementa bila najdena (oziroma null, če elementa ni v drevesu).
+Imenu vozlišča naj bo pripeta zvezdica, če je vrednost najdena v seznamu rešitev (memoizacija). Primer klica te
+funkcije na zgornjem primeru je:
+> (poisci example (list 6 15 18 17 7 2))
+'(null "d" null "dd*" "ld*" "ll")
+b) Zakaj uporaba principa memoizacije na zgornjem primeru ni smiselna?
+
+
+#lang racket
+
+(define-struct tree (id left value right))
+
+(define example
+  (make-tree "koren"
+             (make-tree "l" 
+                        (make-tree "ll" null 2 (make-tree "lld" null 3 null))
+                        5
+                        (make-tree "ld" null 7 null))
+             10
+             (make-tree "d" null
+                        15
+                        (make-tree "dd" null
+                                   17
+                                   (make-tree "ddd" null 19 null)))))
+
+(define memo (make-hash))
+
+(define (poisci tree elements)
+  (map (lambda (element) (search tree element)) elements))
+
+(define (search tree element)
+  (cond
+    [(hash-ref memo element #f) => (lambda (x) (string-append x "*"))]
+    [(null? tree) (hash-set! memo element "null") "null"]
+    [(= element (tree-value tree)) (hash-set! memo element (tree-id tree)) (tree-id tree)]
+    [(< element (tree-value tree)) (search (tree-left tree) element)]
+    [else (search (tree-right tree) element)]))
+
+(poisci example (list 6 15 18 17 7 2))
+
+The reason why memoization is not useful in this case is because each search starts from the root of the tree, so the paths of different searches don't overlap much. Therefore, the probability of reusing the results of previous searches is low.
+
+5. NALOGA
+V programskem jeziku Python 3 napišite generator poštevanke. Generator naj kot argumente sprejme število
+zahtevanih večkratnikov vsakega števila (podan argument z vrednostjo n pomeni: »generiraj 1-, 2-, … n- kratnik
+števila) in seznam števil, katerih večkratnike bomo generirali.
+Tako naj generator postevanka(10,[2,3]) po vrsti generira 1-, 2- do 10-kratnike števil 2 in 3. Vsak rezultat naj bo
+oblike (število, faktor, zmnožek). V zgornjem primeru bi rezultat torej bil: (2,1,2), (2,2,4), (2,3,6),
+..., (3,10,30).
+Nalogo rešite na dva načina:
+a) z uporabo generatorske funkcije in
+b) z uporabo generatorskega izraza
+
+def postevanka(n, numbers):
+    for number in numbers:
+        for i in range(1, n+1):
+            yield (number, i, number*i)
+
+# Test the generator
+for result in postevanka(10, [2, 3]):
+    print(result)
+
+
+def postevanka(n, numbers):
+    return ((number, i, number*i) for number in numbers for i in range(1, n+1))
+
+# Test the generator
+for result in postevanka(10, [2, 3]):
+    print(result)
+
+1. NALOGA
+Odgovori na naslednja vprašanja:
+a) Definirajte sintakso, semantiko in podatkovni tip funkcije hd v jeziku SML.
+Syntax: hd list
+Semantics: Returns the first element of list. If list is empty, it raises the List.Empty exception.
+Type: 'a list -> 'a. This means it takes a list of elements of any type 'a and returns an element of the same type 'a.
+
+b) Določite podatkovni tip naslednje funkcije:
+fun mf x y =
+ case x y of
+ NONE => (fn y => [])
+('a -> 'b option) -> 'a -> 'c -> 'd list
+
+c) Kaj je to funkcijska ovojnica?
+pri deklaraciji funkcije torej ni dovolj, da shranimo le programsko kodo funkcije,
+temveč je potrebno shraniti tudi trenutno okolje
+• FUNKCIJSKA OVOJNICA = koda funkcije + trenutno okolje 
+
+d) Kaj je to šibko tipiziranje?
+Weak typing means that the type system of a programming language allows more flexibility with how data types can be interchanged. This can lead to errors such as unintended type conversions, accessing memory locations that are not in use, etc. Examples of weakly typed languages include JavaScript and PHP.
+
+Tipizator ki omogoca casting na spremenljivke
+
+2. NALOGA
+V programskem jeziku SML napiši naslednji program:
+a) Definiraj rekurzivni polimorfni podatkovni tip drevo, ki predstavlja binarno drevo. Vsako
+notranje vozlišče naj (poleg povezave na levo in desno poddrevo) hrani vrednost enega
+podatkovnega tipa ('a), listi pa lahko hranijo vrednost drugega podatkovnega tipa ('b).
+b) Napiši program, ki sprejme primer opisanega drevesa in vrne terko (a, b), kjer a in b
+predstavljata število elementov tipa 'a in število elementov tipa 'b.
+c) Denimo, da želimo napisati program, ki preveri, ali sta 'a in 'b isti podatkovni tip. Ali to
+lahko naredimo? Obrazloži.
+
+datatype ('a, 'b) tree = Node of 'a * ('a, 'b) tree * ('a, 'b) tree | Leaf of 'b
+
+fun count_elements (Node (value, left, right)) =
+    let
+        val (a1, b1) = count_elements left
+        val (a2, b2) = count_elements right
+    in
+        (a1 + a2 + 1, b1 + b2)
+    end
+  | count_elements (Leaf value) = (0, 1)
+
+In SML, you cannot write a program that checks if 'a and 'b are the same data type. This is because SML is statically typed, which means that types are checked at compile time, not at runtime. Therefore, you cannot write a function that takes two values and returns whether they are the same type, because the types of the values are not known at runtime. Furthermore, SML's type system is strong, which means that it does not allow implicit type conversions. Therefore, you cannot compare values of different types or use a value of one type as if it were another type.
+
+3. NALOGA
+V programskem jeziku SML sta podana naslednji modul in podpis:
+structure Logika :> LogSig1 =
+struct
+ type vrednost = bool * int
+ exception Napaka
+ fun izdelaj (x,y) = if y < 10 then (x,y) else raise Napaka
+ fun obdelaj (x,y) = (not x, if y mod 2 = 0 then y-1 else y+1)
+end
+
+signature LogSig1 =
+sig
+ type vrednost
+ val izdelaj : vrednost -> vrednost
+ val obdelaj : vrednost -> vrednost
+end
+Odgovori na naslednja vprašanja:
+a) Ali je podpis LogSig1 skladen z modulom?
+b) Kaj se zgodi ob klicu funkcij izdelaj in obdelaj?
+The izdelaj function takes a tuple (x, y) of type vrednost, checks if y is less than 10, and if so, returns the vrednost tuple (x, y). If y is not less than 10, it raises the Napaka exception. The obdelaj function takes a tuple (x, y), negates x, and if y is even, it subtracts 1 from y, otherwise it adds 1 to y. It then returns the tuple (not x, new_y).
+c) S čim je potrebno dopolniti kodo za zagotovitev programov v modulu?
+signature LogSig1 =
+sig
+ type vrednost
+ exception Napaka
+ val izdelaj : vrednost -> vrednost
+ val obdelaj : vrednost -> vrednost
+end
+
+
+4. NALOGA
+Napiši naslednjo programsko kodo v programskem jeziku Racket:
+1. S spremenljivim seznamom (mutable list) predstavi igralno površino za igro križcev ("x") in
+krožcev ("o"). Za ta namen uporabi seznam vgnezdenih seznamov (vsak notranji seznam
+predstavlja eno vrstico), ki naj bo definiran globalno.
+2. Napiši funkcijo oblike:
+(poteza znak koordinate)
+kjer je znak oznaka igralca, ki je naslednji na potezi (torej "x" ali "o"), koordinate pa so podane
+v obliki parov vrstica-stolpec in jih je lahko več. Primer klica funkcije:
+(poteza "x" (cons 3 1) (cons 1 1) (cons 2 3)).
+Funkcija naj ustrezno spremeni igralno površino tako, da na podane koordinate doda
+izmenjujoče poteze igralcev. V zgornjem primeru torej: na prvo koordinato (cons 3 1) doda
+"x", na naslednjo koordinato (cons 1 1) doda "o" in na zadnjo koordinato (cons 2 3) doda
+ponovno "x". Funkcija naj se ne ukvarja s tem, ali je polje na igralni plošči že zasedeno ali ne.
+
+
+#lang racket
+
+(define game-board (list (list #f #f #f) (list #f #f #f) (list #f #f #f)))
+
+(define (list-set lst idx val)
+  (if (zero? idx)
+      (cons val (cdr lst))
+      (cons (car lst) (list-set (cdr lst) (sub1 idx) val))))
+
+(define (poteza mark coordinates)
+  (for-each (lambda (coordinate)
+              (let* ((x (car coordinate))
+                     (y (cadr coordinate))
+                     (row (list-ref game-board x)))
+                (set! game-board (list-set game-board x (list-set row y mark))))
+              (set! mark (if (equal? mark "x") "o" "x")))
+            coordinates))
+
+(poteza "x" (list (list 0 0) (list 1 1) (list 2 2)))
+
+game-board
+
+
+1. NALOGA
+Odgovori na naslednja vprašanja:
+a) Definirajte sintakso, semantiko in omejitve ukaza val v jeziku SML.
+Syntax: val identifier = expression
+Semantics: It evaluates the expression and binds the result to identifier.
+Constraints: The identifier must be a valid SML identifier and it must not have been previously defined in the same scope. The expression must be a valid SML expression.
+b) Določite podatkovni tip naslednje funkcije:
+fun mf x y =
+ case (x,y) of
+ (a, _) => a [3]
+
+((int list -> 'a) * 'b) -> 'a
+c) Na kakšne vse načine lahko optimiziramo funkcijske ovojnice v programskih jezikih?
+Inlining: If the function is small, it can be inlined to avoid the overhead of a function call.
+Dead code elimination: If the closure does not use some of the captured variables, they can be removed.
+Lambda lifting: If a closure is only used in one place, it can be replaced with a function.
+d) Pojasni težavo pri istočasnem ugotavljanju trdnosti, polnosti in ustavljivosti sistema za
+preverjanje pravilnosti tipov.
+The problem with simultaneously determining soundness, completeness, and decidability of a type system is that these properties are often at odds with each other:
+
+Soundness means that if a program type checks, it will not produce any type errors at runtime.
+Completeness means that if a program will not produce any type errors at runtime, it type checks.
+Decidability means that there is an algorithm that can determine whether any program type checks.
+However, it's impossible for a type system to be both sound and complete for all programs due to the undecidability of the halting problem. If a type system is sound and complete, it's not decidable. If it's decidable, it can't be both sound and complete.
+
+
+2. NALOGA
+Podana je naslednja funkcija process:
+fun process x [] = [x]
+ | process x (y::l) =
+ if x < y then x::y::l
+ else y::(process x l)
+Naloge:
+a) Opiši, kaj dela podana funkcija.
+The function process takes an integer x and a list of integers. It inserts x into the list at the correct position to keep the list sorted in ascending order. If x is less than the first element of the list, it is inserted at the beginning. Otherwise, the function is called recursively on the rest of the list.
+
+b) Podano funkcijo process je možno podati tudi z uporabo naslednje funkcije, če le pravilno
+opredelimo njene argumente:
+fun process2 x = foldr step [x]
+Zakaj ima funkcija process2 manj argumentov kot prva?
+The function process2 has fewer arguments because it uses foldr, which encapsulates the recursive pattern that process uses. foldr takes a binary function (in this case step), a starting value (in this case [x]), and a list to fold over. The list argument is not explicitly mentioned in the definition of process2 because it is an argument to foldr.
+
+c) Podaj ustrezno definicjo argumenta step.
+fun step y xs =
+    if x < y then x::y::xs
+    else y::(process x xs)
+
+
+3. NALOGA
+Na predavanjih smo implementirali funkcijo v jeziku Racket, ki uporablja memoizacijo za izračun
+Fibonaccijevih števil. Denimo, da implementiramo funkcijo (potenca osnova eksponent), kot sledi:
+potenca(osnova, eksponent) = {
+1, č𝑒 𝑒𝑘𝑠𝑝𝑜𝑛𝑒𝑛𝑡 = 0
+𝑜𝑠𝑛𝑜𝑣𝑎 ∗ 𝑝𝑜𝑡𝑒𝑛𝑐𝑎(𝑜𝑠𝑛𝑜𝑣𝑎, 𝑒𝑘𝑠𝑝𝑜𝑛𝑒𝑛𝑡 − 1), 𝑠𝑖𝑐𝑒𝑟
+Če nadgradimo opisano funkcijo z memoizacijo, se izkaže, da ne dosežemo pohitritve. Odgovori:
+a) Razloži, zakaj ne pride do pohitritve.
+b) Napiši novo verzijo funkcije potenca, ki za argument osnova uporablja privzeto vrednost 2, za
+eksponent privzeto vrednost 10, eksponent pa lahko naslavlja tudi s ključno besedo #:exp.
+c) Podaj 5 različnih primerov klicev funkcije iz naloge b). Pri tem spreminjaj vrednosti argumentov
+in njihov vrstni red. Za vsak klic podaj odgovor.
+
+(define (potenca #:osnova [osnova 2] #:exp [exp 10])
+  (if (zero? exp)
+      1
+      (* osnova (potenca #:osnova osnova #:exp (sub1 exp)))))
+
+(potenca) ; Returns 1024, because the default values are 2 for the base and 10 for the exponent
+(potenca #:osnova 3) ; Returns 59049, because the base is 3 and the default exponent is 10
+(potenca #:exp 5) ; Returns 32, because the default base is 2 and the exponent is 5
+(potenca #:osnova 3 #:exp 3) ; Returns 27, because the base is 3 and the exponent is 3
+(potenca #:exp 3 #:osnova 3) ; Returns 27, because the base is 3 and the exponent is 3, order doesn't matter
+
+
+1. NALOGA (20 točk)
+Določi podatkovni tip naslednjim funkcijam:
+a) fun prva (a, b) c =
+ a::c
+
+(a' list * 'b) -> a' list -> a' list
+b) fun druga (a, b) c =
+ {a=b andalso c, b=c, c=a}
+
+('a * bool) -> bool -> {a=bool, b=bool, a='a}
+c) fun tretja (a, b, c) =
+ ([c a, c b], c)
+
+(a' * 'b * ('a -> 'b)) -> ('a list * ('a -> 'b))
+d) fun cetrta [a, b, c] =
+ let val a = 3
+ val b = 4
+ in
+ c a = c b
+ end
+
+('a * 'a * (int -> 'b)) list -> bool
+
+3. NALOGA (20 točk)
+Z uporabo rekurzivnega ujemanja vzorcev napiši funkcijo s podatkovnim tipom:
+fn : (int * int) option list -> int option list
+Funkcija naj deluje tako, da vhodni seznam preslika v izhodnega, in sicer:
+ če za opcijo terke v vhodnem seznamu SOME (a,b) velja a>b, potem naj izhodni seznam
+na tem mestu vsebuje element SOME (a+b);
+ če za opcijo terke v vhodnem seznamu SOME (a,b) velja a<=b, potem naj izhodni seznam
+na tem mestu vsebuje element NONE;
+ če je opcija v vhodnem seznamu enaka NONE, je ta element v izhodnem seznamu izpuščen.
+
+fun moja [] = []
+  | moja (NONE :: xs) = moja xs
+  | moja (SOME (a, b) :: xs) = 
+      if a > b then SOME (a + b) :: moja xs
+      else NONE :: moja xs
+
+4. NALOGA (20 točk)
+Napiši funkcijo, ki uporablja repno rekurzijo in deluje tako, da vsaki drugi element seznama (prvi,
+tretji, …) poveča za vrednost 10. Primer delovanja:
+- vsakdrug [4,5,6,7,8,9,8,7,6];
+val it = [14,5,16,7,18,9,18,7,16] : int list
+
+fun vsakdrug sez = 
+  let
+    fun helper ([], acc) = List.rev acc
+      | helper ([x], acc) = helper([], x::acc)
+      | helper (x1::x2::xs, acc) = helper(xs, x2::(x1 + 10)::acc)
+  in
+    helper(sez, [])
+  end;
+
+fun vsakdrug sez = 
+  let
+    fun helper ([], _, acc) = acc
+      | helper (x::xs, true, acc) = helper(xs, false, acc @ [x + 10])
+      | helper (x::xs, false, acc) = helper(xs, true, acc @ [x])
+  in
+    helper(sez, true, [])
+  end;
+
+
+1. NALOGA:
+Podaj odgovore na naslednja vprašanja:
+a) Zapiši sinatakso, semantiko, in postopek preverjanja pravilnosti tipov za n-mestno terko v
+programskem jeziku SML.
+In SML, an n-tuple is a collection of n values. The syntax for an n-tuple is (v1, v2, ..., vn), where v1, v2, ..., vn are the values in the tuple. The semantics of an n-tuple is that it's an ordered collection of values, and each value can be of a different type. The type of an n-tuple is (t1 * t2 * ... * tn), where t1, t2, ..., tn are the types of the values in the tuple. The type checking rule for an n-tuple is that if the types of v1, v2, ..., vn are t1, t2, ..., tn respectively, then the type of the tuple (v1, v2, ..., vn) is (t1 * t2 * ... * tn).
+
+
+b) Določi podatkovni tip funkcije fun1:
+datatype ('a, 'b) set = elem of 'a list * ('a, 'b) set | empty of 'b
+fun fun1 (x, y) [z] =
+ case y of
+ elem ([nil], empty z) => x
+ | _ => SOME z
+
+('a option list * ('a, 'b) set) -> 'a list -> 'a option list
+
+
+2. NALOGA:
+Podani so podatkovni tip ('a, 'b) set in funkcije f1, f2 in f3:
+datatype ('a, 'b) set = elem of 'a list * ('a, 'b) set | empty of 'b
+fun f1 s =
+ case s of
+ elem (a, b) => List.length a + f1 b
+ | empty _ => 0
+fun f2 s =
+ case s of
+ elem (a, b) => (List.foldl op* 1 a) * f2 b
+ | empty _ => 1
+fun f3 s =
+ case s of
+ elem (a, b) => f3 b
+ | empty b => b
+a) Zapiši posplošeno funkcijo višjega reda (refaktoriziraj kodo), s katero lahko implementiraš delovanje
+vseh treh podanih funkcij.
+b) Poleg kode posplošene funkcije zapiši tudi delne aplikacije posplošene funkcije, s katerimi dosežemo
+enako delovanje kot je delovanje podanih funkcij f1, f2 in f3.
+c) Pri zapisih katerih delnih aplikacij posplošene funkcije (za f1, f2 in f3) imamo lahko težave z omejitvijo
+vrednosti? Kako jih rešimo? 
+
+fun fold_set f z s =
+  case s of
+    elem (a, b) => f a (fold_set f z b)
+  | empty _ => z
+
+val f1 = fold_set (fn a => fn b => List.length a + b) 0
+val f2 = fold_set (fn a => fn b => List.foldl op* 1 a * b) 1
+val f3 = fold_set (fn _ => fn b => b) 0
