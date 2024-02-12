@@ -551,9 +551,12 @@ vprašanja:
 a) Naštej vsaj tri stvari (na podlagi izkušenj pri programskih jezikih, ki smo jih uporabljali pri predmetu), ki jih pri
 implementaciji tega novega programskega jezika moramo definirati v okviru definicije semantike jezika.
 
-sitaksa, tipizator in pravila za evaluacijo?, makri
+staticno tipiziran type checker, ne dovolimo mutacij?, lahko imamo polimorfne tipe
 b) Na kratkem primeru programa (ki ga zapiši v sintaksi poljubnega jezika ali psevdokodi) podaj primer lažno
 negativnega (false positive) programa in utemelji lažno negativnost.
+So lazno pozitvna programa (ki ima napaka?)
+if true then 0 else "boo"
+
 c) Podaj primere treh obstoječih programskih jezikov, ki imajo trden in ustavljiv tipizator in jih razdeli med implicitno
 in eksplicitno tipizirane jezike
 
